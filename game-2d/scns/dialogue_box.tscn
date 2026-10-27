@@ -1,0 +1,150 @@
+[gd_scene format=3 uid="uid://dglbox01scne"]
+
+[ext_resource type="Script" uid="uid://bs2bdexblty7f" path="res://scripts/dialogue_box.gd" id="1_dlg"]
+[ext_resource type="Texture2D" uid="uid://7y7sxhw7ctqm" path="res://assets/images/UI/dialoguebox.png" id="2_dbox"]
+[ext_resource type="Texture2D" uid="uid://iuixkicop83t" path="res://assets/images/UI/nine_path_bg.png" id="3_bg"]
+[ext_resource type="FontFile" uid="uid://bav0mfec8w51p" path="res://assets/images/font/NormalFont.ttf" id="4_font"]
+[ext_resource type="Texture2D" uid="uid://blwmski8qpbjr" path="res://assets/images/UI/dialogue_next.png" id="5_next"]
+[ext_resource type="AudioStream" uid="uid://dlwg5kpqe1jel" path="res://assets/audio/health_pickup.wav" id="6_audio"]
+
+[node name="DialogueBox" type="CanvasLayer" unique_id=2031737696]
+process_mode = 3
+layer = 90
+script = ExtResource("1_dlg")
+
+[node name="Root" type="Control" parent="." unique_id=1796519778]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ClickArea" type="Control" parent="Root" unique_id=1903283611]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BoxContainer" type="Control" parent="Root" unique_id=745624526]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -426.0
+offset_top = -258.0
+offset_right = 426.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 1
+
+[node name="BoxTexture" type="TextureRect" parent="Root/BoxContainer" unique_id=918687976]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_dbox")
+expand_mode = 1
+
+[node name="PortraitFrame" type="NinePatchRect" parent="Root/BoxContainer" unique_id=96293243]
+layout_mode = 0
+offset_left = 38.0
+offset_top = 36.0
+offset_right = 162.0
+offset_bottom = 160.0
+texture = ExtResource("3_bg")
+patch_margin_left = 4
+patch_margin_top = 4
+patch_margin_right = 4
+patch_margin_bottom = 4
+
+[node name="PortraitTexture" type="TextureRect" parent="Root/BoxContainer/PortraitFrame" unique_id=1145270672]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SpeakerNameLabel" type="Label" parent="Root/BoxContainer" unique_id=1951792077]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 180.0
+offset_top = 34.0
+offset_right = 520.0
+offset_bottom = 70.0
+theme_override_colors/font_color = Color(0.68, 0.22, 0.12, 1)
+theme_override_colors/font_shadow_color = Color(0.92, 0.86, 0.78, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 22
+text = "Speaker"
+
+[node name="DialogueLabel" type="RichTextLabel" parent="Root/BoxContainer" unique_id=1437712846]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 180.0
+offset_top = 74.0
+offset_right = 780.0
+offset_bottom = 194.0
+mouse_filter = 1
+theme_override_colors/default_color = Color(0.16, 0.12, 0.1, 1)
+theme_override_fonts/normal_font = ExtResource("4_font")
+theme_override_font_sizes/normal_font_size = 20
+bbcode_enabled = true
+text = "Dialogue text will appear here."
+scroll_active = false
+
+[node name="NextButton" type="TextureButton" parent="Root/BoxContainer" unique_id=1600331070]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 780.0
+offset_top = 170.0
+offset_right = 816.0
+offset_bottom = 206.0
+texture_normal = ExtResource("5_next")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="NextHintLabel" type="Label" parent="Root/BoxContainer" unique_id=1902971435]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 660.0
+offset_top = 176.0
+offset_right = 774.0
+offset_bottom = 202.0
+theme_override_colors/font_color = Color(0.45, 0.35, 0.25, 1)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 14
+text = "[Click / E]"
+horizontal_alignment = 2
+
+[node name="TypeSound" type="AudioStreamPlayer" parent="." unique_id=561486331]
+process_mode = 3
+stream = ExtResource("6_audio")
+volume_db = -22.0
+pitch_scale = 2.4
+bus = &"SFX"
+
+[node name="SelectSound" type="AudioStreamPlayer" parent="." unique_id=845720572]
+process_mode = 3
+stream = ExtResource("6_audio")
+volume_db = -10.0
+pitch_scale = 1.4
+bus = &"SFX"
