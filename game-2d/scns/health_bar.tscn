@@ -8,6 +8,8 @@
 script = ExtResource("1_ockm7")
 
 [node name="HealthUnder" type="Sprite2D" parent="." unique_id=917634675]
+position = Vector2(-6, 0)
+scale = Vector2(3.111111, 1)
 texture = ExtResource("1_ms03j")
 centered = false
 

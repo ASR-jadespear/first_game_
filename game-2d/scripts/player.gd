@@ -219,6 +219,9 @@ func _process_follower(delta: float) -> void:
 		_stuck_timer = 0.0
 		_last_stuck_pos = global_position
 		velocity = Vector2.ZERO
+		if to_target.length_squared() > 16.0:
+			last_direction = to_target.normalized()
+			update_hitbox_offset()
 		play_animation("idle", last_direction)
 
 
@@ -244,15 +247,46 @@ func process_animation() -> void:
 func play_animation(prefix: String, dir: Vector2) -> void:
 	if not animated_sprite_2d:
 		return
-	if dir.x != 0:
-		animated_sprite_2d.flip_h = dir.x < 0
-		animated_sprite_2d.play(prefix + "_right")
-	elif dir.y < 0:
-		animated_sprite_2d.play(prefix + "_up")
-	elif dir.y > 0:
-		animated_sprite_2d.play(prefix + "_down")
+
+	if dir == Vector2.ZERO:
+		if last_direction != Vector2.ZERO:
+			dir = last_direction
+		else:
+			dir = Vector2.DOWN
+
+	var anim_name_curr = animated_sprite_2d.animation
+	var current_is_vertical: bool = anim_name_curr.ends_with("_up") or anim_name_curr.ends_with("_down")
+
+	var choose_vertical: bool = false
+	var HYSTERESIS: float = 0.15
+
+	if current_is_vertical:
+		if absf(dir.x) > absf(dir.y) + HYSTERESIS:
+			choose_vertical = false
+		else:
+			choose_vertical = true
 	else:
-		animated_sprite_2d.play(prefix + "_down")
+		if absf(dir.y) > absf(dir.x) + HYSTERESIS:
+			choose_vertical = true
+		else:
+			choose_vertical = false
+
+	if choose_vertical:
+		animated_sprite_2d.flip_h = false
+		if dir.y < 0.0:
+			animated_sprite_2d.play(prefix + "_up")
+		else:
+			animated_sprite_2d.play(prefix + "_down")
+	else:
+		if absf(dir.x) > 0.001:
+			animated_sprite_2d.flip_h = (dir.x < 0.0)
+			animated_sprite_2d.play(prefix + "_right")
+		elif dir.y < 0.0:
+			animated_sprite_2d.flip_h = false
+			animated_sprite_2d.play(prefix + "_up")
+		else:
+			animated_sprite_2d.flip_h = false
+			animated_sprite_2d.play(prefix + "_down")
 
 
 func attack() -> void:

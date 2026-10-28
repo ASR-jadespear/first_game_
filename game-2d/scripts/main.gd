@@ -24,6 +24,7 @@ var flower_pot_dialogue_shown: bool = false
 var _exit_warning_active: bool = false
 var _is_dying: bool = false
 var _previous_health: int = 100
+var _ending_bg_layer: CanvasLayer = null
 
 
 func _ready() -> void:
@@ -69,6 +70,10 @@ func _on_restart_level() -> void:
 		level1_all_defeated_dialogue_shown = false
 	elif level == 2:
 		level2_one_heart_unleash_prompt_shown = false
+	if is_instance_valid(_ending_bg_layer):
+		_ending_bg_layer.queue_free()
+		_ending_bg_layer = null
+	is_ending_cutscene_running = false
 	_load_level(level)
 
 
@@ -89,6 +94,9 @@ func _on_restart_game() -> void:
 	level2_intro_dialogue_shown = false
 	level2_one_heart_unleash_prompt_shown = false
 	is_ending_cutscene_running = false
+	if is_instance_valid(_ending_bg_layer):
+		_ending_bg_layer.queue_free()
+		_ending_bg_layer = null
 	level = 1
 	if has_node("StartScreen"):
 		if current_level_root:
@@ -147,6 +155,9 @@ func _show_combat_tutorial_dialogue() -> void:
 
 func _load_level(level_number: int) -> void:
 	_is_transitioning = false
+	if is_instance_valid(_ending_bg_layer):
+		_ending_bg_layer.queue_free()
+		_ending_bg_layer = null
 	_previous_health = PlayerStats.health
 	level_two_hearts_dialogue_shown = false
 	level_one_heart_dialogue_shown = false
@@ -810,6 +821,67 @@ func _on_exit_body_entered(body: Node2D) -> void:
 			call_deferred("_load_level", level)
 
 
+func _show_final_bg_screen() -> CanvasLayer:
+	if is_instance_valid(_ending_bg_layer):
+		_ending_bg_layer.queue_free()
+
+	var canvas = CanvasLayer.new()
+	canvas.name = "FinalBGLayer"
+	canvas.layer = 85
+
+	var root = Control.new()
+	root.name = "Root"
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.anchor_right = 1.0
+	root.anchor_bottom = 1.0
+	root.offset_left = 0
+	root.offset_top = 0
+	root.offset_right = 0
+	root.offset_bottom = 0
+	root.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	root.grow_vertical = Control.GROW_DIRECTION_BOTH
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	canvas.add_child(root)
+
+	var black_bg = ColorRect.new()
+	black_bg.name = "BlackBG"
+	black_bg.color = Color.BLACK
+	black_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	black_bg.anchor_right = 1.0
+	black_bg.anchor_bottom = 1.0
+	black_bg.offset_left = 0
+	black_bg.offset_top = 0
+	black_bg.offset_right = 0
+	black_bg.offset_bottom = 0
+	black_bg.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	black_bg.grow_vertical = Control.GROW_DIRECTION_BOTH
+	black_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(black_bg)
+
+	var bg_tex = TextureRect.new()
+	bg_tex.name = "FinalBGTexture"
+	bg_tex.texture = preload("res://assets/images/portrait/final_bg.png")
+	bg_tex.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	bg_tex.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg_tex.anchor_right = 1.0
+	bg_tex.anchor_bottom = 1.0
+	bg_tex.offset_left = 0
+	bg_tex.offset_top = 0
+	bg_tex.offset_right = 0
+	bg_tex.offset_bottom = 0
+	bg_tex.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	bg_tex.grow_vertical = Control.GROW_DIRECTION_BOTH
+	bg_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bg_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	bg_tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(bg_tex)
+
+	root.modulate.a = 0.0
+	add_child(canvas)
+	_ending_bg_layer = canvas
+	return canvas
+
+
 func _run_ending_cutscene() -> void:
 	is_ending_cutscene_running = true
 
@@ -839,6 +911,14 @@ func _run_ending_cutscene() -> void:
 		player2.play_animation("idle", Vector2.RIGHT)
 
 	await get_tree().create_timer(0.3).timeout
+
+	# Show final background screen behind dialogue
+	var ending_bg = _show_final_bg_screen()
+	var fade_in = create_tween()
+	fade_in.tween_property(ending_bg.get_node("Root"), "modulate:a", 1.0, 0.4)
+	await fade_in.finished
+
+	await get_tree().create_timer(0.2).timeout
 
 	# The Game Ending Dialogues
 	DialogueManager.start_dialogue([
@@ -894,6 +974,17 @@ func _run_ending_cutscene() -> void:
 	}
 ])
 	await DialogueManager.dialogue_ended
+
+	# Hide final background screen so the characters are shown at the portal
+	if is_instance_valid(ending_bg):
+		var fade_out = create_tween()
+		fade_out.tween_property(ending_bg.get_node("Root"), "modulate:a", 0.0, 0.4)
+		await fade_out.finished
+		if is_instance_valid(ending_bg):
+			ending_bg.queue_free()
+		_ending_bg_layer = null
+
+	await get_tree().create_timer(0.3).timeout
 
 	# P1 walks into the portal and P2 disappears
 	if player1 and portal:
