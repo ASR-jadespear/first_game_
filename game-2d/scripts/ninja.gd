@@ -30,6 +30,9 @@ var targets_in_attack_range: Array[Node2D] = []
 
 var knockback_velocity: Vector2 = Vector2.ZERO
 
+# Obstacle steering bias: positive = favour right/CW side, negative = left/CCW
+var _steer_bias: float = 0.0
+
 var health_pickup_scene: PackedScene = preload("res://scns/health_pickup.tscn")
 
 func _ready() -> void:
@@ -43,6 +46,23 @@ func _ready() -> void:
 	attack_range.body_exited.connect(_on_attack_range_body_exited)
 	hit_box.body_entered.connect(_on_hit_box_body_entered)
 	attack_timer.timeout.connect(_on_attack_timer_timeout)
+	call_deferred("_init_overlapping_targets")
+
+func _init_overlapping_targets() -> void:
+	if not is_alive:
+		return
+	if sight:
+		for body in sight.get_overlapping_bodies():
+			if body.is_in_group("player") or body.name.begins_with("Player"):
+				if body not in targets_in_sight:
+					targets_in_sight.append(body)
+		_update_ninja_target()
+	if attack_range:
+		for body in attack_range.get_overlapping_bodies():
+			if body.is_in_group("player") or body.name.begins_with("Player"):
+				if body not in targets_in_attack_range:
+					targets_in_attack_range.append(body)
+		player_in_attack_range = not targets_in_attack_range.is_empty()
 
 func _physics_process(delta: float) -> void:
 	if not is_alive:
@@ -54,8 +74,7 @@ func _physics_process(delta: float) -> void:
 			play_animation("idle", last_direction)
 		return
 
-	if targets_in_sight.size() > 1:
-		_update_ninja_target()
+	_update_ninja_target()
 
 	# Handle physics-based knockback
 	if knockback_velocity.length_squared() > 10.0:
@@ -63,111 +82,174 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, 1500.0 * delta)
 		return
-		
+
 	if is_attacking:
 		velocity = velocity.move_toward(Vector2.ZERO, 500.0 * delta)
 		move_and_slide()
 		return
-		
+
 	if target:
+		if not is_instance_valid(target) or target.get("alive") == false:
+			target = null
+			velocity = Vector2.ZERO
+			play_animation("idle", last_direction)
+			return
+
 		var to_target = target.global_position - global_position
 		var dist = to_target.length()
 		var dir = to_target / dist if dist > 0.0 else Vector2.ZERO
-		
-		_update_direction(dir)
+
+		_update_direction_towards(dir)
 		_update_hitbox_position()
-		
-		if _is_facing_obstacle(dir):
-			# Facing an obstacle: stop and go to idle state in last direction
-			velocity = Vector2.ZERO
-			play_animation("idle", last_direction)
-		elif player_in_attack_range:
+
+		# Attack only when in attack range AND no wall is between ninja and player
+		if player_in_attack_range and not _has_wall_between_us(dir, dist):
+			_steer_bias = move_toward(_steer_bias, 0.0, delta * 4.0)
 			velocity = Vector2.ZERO
 			if attack_timer.is_stopped():
 				_start_attack()
 			else:
 				play_animation("idle", last_direction)
-		else:
-			velocity = dir * SPEED
+			return
+
+		# Navigate toward the player, steering around any obstacles
+		var nav_dir = _get_nav_direction(dir, dist, delta)
+		if nav_dir != Vector2.ZERO:
+			velocity = nav_dir * SPEED
 			move_and_slide()
 			play_animation("walk", last_direction)
+		else:
+			# Truly cornered — stand idle, will retry next frame
+			velocity = Vector2.ZERO
+			play_animation("idle", last_direction)
 	else:
+		_steer_bias = 0.0
 		velocity = Vector2.ZERO
 		play_animation("idle", last_direction)
 
-func _is_facing_obstacle(dir: Vector2) -> bool:
-	# 1. If currently colliding with a wall/obstacle (excluding the player)
-	if is_on_wall():
-		for i in get_slide_collision_count():
-			var col = get_slide_collision(i)
-			var collider = col.get_collider()
-			if collider != null and collider != target and not collider.is_in_group("player"):
-				var wall_n = col.get_normal()
-				if dir.dot(wall_n) < 0.1 or last_direction.dot(wall_n) < 0.1:
-					return true
 
-	# 2. Check directly in front of the ninja in last_direction and towards target
+# Returns the best movement direction toward the player, going around walls.
+# Returns Vector2.ZERO only when every candidate is fully blocked.
+# NOTE: does NOT touch last_direction — facing is driven by dir_to_player only.
+func _get_nav_direction(dir_to_target: Vector2, dist: float, delta: float) -> Vector2:
+	var origin = global_position + Vector2(0, 14)
+	var probe_len = min(52.0, dist)
+
+	# 1. Direct path — use it if clear
+	if not _ray_hits_wall(origin, dir_to_target, probe_len):
+		_steer_bias = move_toward(_steer_bias, 0.0, delta * 3.0)
+		return dir_to_target
+
+	# 2. Direct path blocked: fan out angled candidates on both sides.
+	#    _steer_bias commits to one lateral side to prevent frame-to-frame
+	#    oscillation. We do NOT call _update_direction_towards here — facing
+	#    is determined by the direction-to-player in the main loop, keeping
+	#    the animation stable while the body steers around the obstacle.
+	var test_angles = [20.0, 40.0, 60.0, 80.0, 100.0]
+	var signs: Array = [1.0, -1.0] if _steer_bias >= 0.0 else [-1.0, 1.0]
+
+	for angle in test_angles:
+		for s in signs:
+			var candidate = dir_to_target.rotated(deg_to_rad(angle * s))
+			if not _ray_hits_wall(origin, candidate, probe_len):
+				_steer_bias = move_toward(_steer_bias, s, delta * 5.0)
+				return candidate
+
+	# 3. All angled forward paths blocked — try pure perpendicular slides (wall-hug)
+	var perp_cw  = Vector2(-dir_to_target.y,  dir_to_target.x)
+	var perp_ccw = Vector2( dir_to_target.y, -dir_to_target.x)
+	var perp_order: Array = [perp_cw, perp_ccw] if _steer_bias >= 0.0 else [perp_ccw, perp_cw]
+
+	for perp in perp_order:
+		if not _ray_hits_wall(origin, perp, probe_len):
+			var side = 1.0 if perp == perp_cw else -1.0
+			_steer_bias = move_toward(_steer_bias, side, delta * 5.0)
+			return perp
+
+	# 4. Completely surrounded — caller will play idle for this frame
+	return Vector2.ZERO
+
+
+# Raycast helper: returns true if a non-player wall blocks the path.
+func _ray_hits_wall(origin: Vector2, dir: Vector2, length: float) -> bool:
+	if dir == Vector2.ZERO or length <= 4.0:
+		return false
 	var space_state = get_world_2d().direct_space_state
-	var center = global_position + Vector2(0, 14)
-	var check_dist = 55.0
+	var query = PhysicsRayQueryParameters2D.create(origin, origin + dir * length, 1)
+	query.exclude = [get_rid()]
+	var hit = space_state.intersect_ray(query)
+	if hit.is_empty():
+		return false
+	var collider = hit.collider
+	# Player bodies are not walls
+	if collider == target or (collider != null and collider.is_in_group("player")):
+		return false
+	return true
 
-	var check_dirs = [last_direction]
-	if dir != Vector2.ZERO and dir != last_direction:
-		check_dirs.append(dir)
 
-	var perp = Vector2(-last_direction.y, last_direction.x) * 18.0
-	var origins = [center, center + perp, center - perp]
+# Used only for the attack gate: is there a wall between the ninja and the player?
+func _has_wall_between_us(dir: Vector2, dist: float) -> bool:
+	return _ray_hits_wall(global_position + Vector2(0, 14), dir, min(dist, 80.0))
 
-	for o in origins:
-		for d in check_dirs:
-			var query = PhysicsRayQueryParameters2D.create(o, o + d * check_dist, 1)
-			query.exclude = [get_rid()]
-			var hit = space_state.intersect_ray(query)
-			if not hit.is_empty():
-				var collider = hit.collider
-				if collider == target or (collider != null and collider.is_in_group("player")):
-					continue
-				return true
 
-	return false
-
-func _update_direction(dir: Vector2) -> void:
+func _update_direction_towards(dir: Vector2) -> void:
 	if dir == Vector2.ZERO:
 		return
-	if abs(dir.x) > abs(dir.y):
-		last_direction = Vector2.RIGHT if dir.x > 0 else Vector2.LEFT
+
+	# Hysteresis prevents rapid flipping between cardinal directions
+	var current_is_horizontal = (last_direction == Vector2.LEFT or last_direction == Vector2.RIGHT)
+	var HYSTERESIS: float = 0.22
+
+	if current_is_horizontal:
+		if absf(dir.y) > absf(dir.x) + HYSTERESIS:
+			last_direction = Vector2.DOWN if dir.y > 0.0 else Vector2.UP
+		else:
+			if last_direction == Vector2.RIGHT and dir.x < -0.15:
+				last_direction = Vector2.LEFT
+			elif last_direction == Vector2.LEFT and dir.x > 0.15:
+				last_direction = Vector2.RIGHT
 	else:
-		last_direction = Vector2.DOWN if dir.y > 0 else Vector2.UP
+		if absf(dir.x) > absf(dir.y) + HYSTERESIS:
+			last_direction = Vector2.RIGHT if dir.x > 0.0 else Vector2.LEFT
+		else:
+			if last_direction == Vector2.DOWN and dir.y < -0.15:
+				last_direction = Vector2.UP
+			elif last_direction == Vector2.UP and dir.y > 0.15:
+				last_direction = Vector2.DOWN
 
 func _update_hitbox_position() -> void:
 	hit_box.position = last_direction * 75.0
 
 func play_animation(prefix: String, dir: Vector2) -> void:
+	var anim_name = prefix + "_down"
 	match dir:
 		Vector2.DOWN:
-			animated_sprite_2d.play(prefix + "_down")
+			anim_name = prefix + "_down"
 		Vector2.UP:
-			animated_sprite_2d.play(prefix + "_up")
+			anim_name = prefix + "_up"
 		Vector2.LEFT:
-			animated_sprite_2d.play(prefix + "_left")
+			anim_name = prefix + "_left"
 		Vector2.RIGHT:
-			animated_sprite_2d.play(prefix + "_right")
+			anim_name = prefix + "_right"
 		_:
-			animated_sprite_2d.play(prefix + "_down")
+			anim_name = prefix + "_down"
+
+	if animated_sprite_2d.animation != anim_name:
+		animated_sprite_2d.play(anim_name)
+	elif not animated_sprite_2d.is_playing():
+		animated_sprite_2d.play()
 
 func _start_attack() -> void:
 	is_attacking = true
 	has_hit_in_current_attack = false
 	hit_box.monitoring = false
 	attack_timer.start()
-	
 	velocity = last_direction * LUNGE_SPEED
 	play_animation("attack", last_direction)
 
 func _on_frame_changed() -> void:
 	if not is_alive or not is_attacking:
 		return
-		
 	if animated_sprite_2d.animation.begins_with("attack"):
 		# Activate hit on the middle frame (frame 2 of 5: windup -> slash -> recovery)
 		if animated_sprite_2d.frame == 2:
@@ -222,12 +304,15 @@ func _update_ninja_target() -> void:
 		return
 	var closest: Node2D = null
 	var min_dist: float = INF
+	var valid_targets: Array[Node2D] = []
 	for p in targets_in_sight:
 		if is_instance_valid(p) and p.get("alive") != false:
+			valid_targets.append(p)
 			var d = global_position.distance_squared_to(p.global_position)
 			if d < min_dist:
 				min_dist = d
 				closest = p
+	targets_in_sight = valid_targets
 	target = closest
 
 func _on_attack_range_body_entered(body: Node2D) -> void:
@@ -239,6 +324,11 @@ func _on_attack_range_body_entered(body: Node2D) -> void:
 func _on_attack_range_body_exited(body: Node2D) -> void:
 	if body in targets_in_attack_range:
 		targets_in_attack_range.erase(body)
+	var valid_targets: Array[Node2D] = []
+	for b in targets_in_attack_range:
+		if is_instance_valid(b) and b.get("alive") != false:
+			valid_targets.append(b)
+	targets_in_attack_range = valid_targets
 	player_in_attack_range = not targets_in_attack_range.is_empty()
 
 func _on_hit_box_body_entered(body: Node2D) -> void:
@@ -251,18 +341,18 @@ func take_damage(damage: int, attacker_position: Vector2 = Vector2.ZERO) -> void
 		return
 	health -= damage
 	health_bar.update_health(health)
-	
+
 	# Damage flash
 	var flash = create_tween()
 	flash.tween_property(animated_sprite_2d, "modulate", Color(2.0, 0.4, 0.4, 1), 0.08)
 	flash.tween_property(animated_sprite_2d, "modulate", Color.WHITE, 0.08)
-	
+
 	if health <= 0:
 		_die()
 	else:
 		take_damage_sound.pitch_scale = randf_range(0.9, 1.1)
 		take_damage_sound.play()
-		
+
 		# Knockback via physics (respects collision with walls/obstacles)
 		var knockback_dir: Vector2 = Vector2.ZERO
 		if attacker_position != Vector2.ZERO:
@@ -289,17 +379,17 @@ func _die() -> void:
 		attack_timer.stop()
 	if health_bar:
 		health_bar.visible = false
-	
+
 	animated_sprite_2d.play("die")
-	
+
 	take_damage_sound.pitch_scale = 0.6
 	take_damage_sound.play()
-	
+
 	$CollisionShape2D.set_deferred("disabled", true)
 	$Sight/CollisionShape2D.set_deferred("disabled", true)
 	$AttackRange/CollisionShape2D.set_deferred("disabled", true)
 	$HitBox/CollisionShape2D.set_deferred("disabled", true)
-	
+
 	if can_drop_item and randf() <= drop_chance:
 		drop_item()
 	defeated.emit()
@@ -310,7 +400,7 @@ func drop_item() -> void:
 	var drop = health_pickup_scene.instantiate()
 	var spawn_pos = global_position
 	drop.position = spawn_pos
-	
+
 	var spawn_parent: Node = null
 	var current: Node = self
 	while current != null and current != get_tree().root:
@@ -318,12 +408,12 @@ func drop_item() -> void:
 			spawn_parent = current.get_node("items")
 			break
 		current = current.get_parent()
-		
+
 	if not spawn_parent:
 		spawn_parent = owner if owner else get_parent()
 	if not spawn_parent:
 		spawn_parent = get_tree().current_scene
-		
+
 	if spawn_parent:
 		spawn_parent.call_deferred("add_child", drop)
 		drop.set_deferred("global_position", spawn_pos)

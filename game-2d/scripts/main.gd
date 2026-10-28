@@ -883,7 +883,7 @@ func _on_player_died() -> void:
 	var death_messages = [
 		"Skill issues detected",
 		"You can do better you know",
-		"Follow the road ,,, dont go looking into random corners.... there is nothing interesting there.... probably"
+		"Dont go looking into random corners.... there is nothing interesting there.... probably"
 	]
 	var chosen_msg = death_messages.pick_random()
 	await get_tree().create_timer(0.6).timeout
