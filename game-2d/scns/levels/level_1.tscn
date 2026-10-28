@@ -2680,6 +2680,9 @@ sources/2 = SubResource("TileSetAtlasSource_oyr06")
 sources/3 = SubResource("TileSetAtlasSource_fbrwv")
 sources/4 = SubResource("TileSetAtlasSource_ua2ah")
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wbivt"]
+size = Vector2(268, 526)
+
 [node name="LevelRoot" unique_id=1950383035 instance=ExtResource("1_ys8j0")]
 
 [node name="TileMapLayer_terrain" parent="." index="0" unique_id=656690504]
@@ -2724,3 +2727,10 @@ position = Vector2(8537, 2435)
 
 [node name="portal" parent="." index="11" unique_id=1410647687 instance=ExtResource("17_ua2ah")]
 position = Vector2(9134, 403)
+
+[node name="FlowerPot" type="Area2D" parent="." index="12" unique_id=702634581]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FlowerPot" index="0" unique_id=1139433918]
+position = Vector2(7259, 3376)
+scale = Vector2(0.5, 0.5)
+shape = SubResource("RectangleShape2D_wbivt")

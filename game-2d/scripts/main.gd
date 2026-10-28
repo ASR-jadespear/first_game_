@@ -20,6 +20,7 @@ var level2_chest2_dialogue_shown: bool = false
 var level2_intro_dialogue_shown: bool = false
 var level2_one_heart_unleash_prompt_shown: bool = false
 var is_ending_cutscene_running: bool = false
+var flower_pot_dialogue_shown: bool = false
 
 
 func _ready() -> void:
@@ -35,6 +36,7 @@ func _on_restart_level() -> void:
 	PlayerStats.reset()
 	level_two_hearts_dialogue_shown = false
 	level_one_heart_dialogue_shown = false
+	flower_pot_dialogue_shown = false
 	if level == 1:
 		level1_first_slime_dialogue_shown = false
 		level1_all_defeated_dialogue_shown = false
@@ -49,6 +51,7 @@ func _on_restart_game() -> void:
 	first_enemy_prompt_shown = false
 	level1_first_slime_dialogue_shown = false
 	level1_all_defeated_dialogue_shown = false
+	flower_pot_dialogue_shown = false
 	level_two_hearts_dialogue_shown = false
 	level_one_heart_dialogue_shown = false
 	first_chest_opened_in_game = false
@@ -89,7 +92,7 @@ func _show_combat_tutorial_dialogue() -> void:
 		{
 			"speaker": "####",
 			"portrait": "####",
-			"text": "Press ENTER to attack enemies, we can proceed to the next dimension once we cleared all enemies here"
+			"text": "Press SPACE to attack enemies, we can proceed to the next dimension once we cleared all enemies here"
 		}
 	])
 
@@ -102,6 +105,7 @@ func _load_level(level_number: int) -> void:
 	_is_transitioning = false
 	level_two_hearts_dialogue_shown = false
 	level_one_heart_dialogue_shown = false
+	flower_pot_dialogue_shown = false
 	if level_number == 1:
 		level1_first_slime_dialogue_shown = false
 		level1_all_defeated_dialogue_shown = false
@@ -165,7 +169,7 @@ func _setup_level(level_root: Node) -> void:
 			if not player2.died.is_connected(_on_player_died):
 				player2.died.connect(_on_player_died)
 
-		hud.show_handover_notice("Level 2: Controls back to Player 1!", "Protect Player 2 and clear the dungeon!")
+		hud.show_over_notice("Level 2: Controls back to Player 1!", "Protect Player 2 and clear the dungeon!")
 		if not level2_intro_dialogue_shown:
 			_start_level2_intro()
 
@@ -178,6 +182,9 @@ func _setup_level(level_root: Node) -> void:
 	var portal = current_level_root.get_node_or_null("portal")
 	if portal and portal.has_signal("body_entered") and not portal.get("is_fake"):
 		portal.body_entered.connect(_on_exit_body_entered)
+
+	# Connect FlowerPot trigger
+	_connect_flower_pot()
 
 	# Connect all enemies to monitor when they are defeated
 	_connect_enemies()
@@ -335,7 +342,7 @@ func _start_level1_cutscene() -> void:
 		{
 			"speaker": "####",
 			"portrait": "####",
-			"text": "what do u think? YOU called me here."
+			"text": "what do u think? YOU brought me here."
 		},
 		{
 			"speaker": "The Boy",
@@ -685,7 +692,7 @@ func _start_level2_intro() -> void:
 		{
 			"speaker": "####",
 			"portrait": "####",
-			"text": "now its your turn to shine, take my powers and show those slimes what you've got"
+			"text": "now its your turn to shine, FOLLOW MY MOVEMENTS and show those slimes what you've got"
 		},
 		{
 			"speaker": "The Boy",
@@ -695,7 +702,13 @@ func _start_level2_intro() -> void:
 		{
 			"speaker": "####",
 			"portrait": "####",
-			"text": "lol... i know you can buddy... "
+			"text": "No... you can't, you were sweating your shits out a while ago... "
+		},
+		
+		{
+			"speaker": "The Boy",
+			"portrait": "The Boy",
+			"text": "Ugghhhh "
 		}
 	])
 	await DialogueManager.dialogue_ended
@@ -749,57 +762,57 @@ func _run_ending_cutscene() -> void:
 
 	# The Game Ending Dialogues
 	DialogueManager.start_dialogue([
-		{
-			"speaker": "The Boy",
-			"portrait": "The Boy",
-			"text": "Finally, the last portal now we can return to our world..Hey buddy, i am so sorry I dragged you into all this (embarassed)"
-		},
-		{
-			"speaker": "####",
-			"portrait": "####",
-			"text": "It's ok, pal."
-		},
-		{
-			"speaker": "The Boy",
-			"portrait": "The Boy",
-			"text": "Shall we go now?"
-		},
-		{
-			"speaker": "####",
-			"portrait": "####",
-			"text": "I can't go with you…"
-		},
-		{
-			"speaker": "The Boy",
-			"portrait": "The Boy",
-			"text": "WHAT!!! Why not"
-		},
-		{
-			"speaker": "####",
-			"portrait": "####",
-			"text": "Haven’t figured it out yet?? I am not real…I am but a fragment of your imagination.. Just like this world I belong to ur …umm..what should i say..creative mind, ig?"
-		},
-		{
-			"speaker": "The Boy",
-			"portrait": "The Boy",
-			"text": "I don't get it, bu...but you’re real, right? i see you every night before going to bed fighting enemies"
-		},
-		{
-			"speaker": "####",
-			"portrait": "####",
-			"text": "Hell, yeah you do, You have always imagined me whenever you were afraid. Hence I came into being, All those evil forces I defeated beside you, It was you who was fighting all along. U are ur own hero, you are the most courageous fan I have ever had….."
-		},
-		{
-			"speaker": "The Boy",
-			"portrait": "The Boy",
-			"text": "I…. dont know what to say.. Thinking of you always made me feel safe."
-		},
-		{
-			"speaker": "####",
-			"portrait": "####",
-			"text": "well the portal is gonna close soon, we can talk about this later, hurry up and go."
-		}
-	])
+	{
+		"speaker": "The Boy",
+		"portrait": "The Boy",
+		"text": "The final portal... We can finally go home. Sorry for dragging you into this."
+	},
+	{
+		"speaker": "####",
+		"portrait": "####",
+		"text": "Don't sweat it."
+	},
+	{
+		"speaker": "The Boy",
+		"portrait": "The Boy",
+		"text": "Ready?"
+	},
+	{
+		"speaker": "####",
+		"portrait": "####",
+		"text": "I can't come with you."
+	},
+	{
+		"speaker": "The Boy",
+		"portrait": "The Boy",
+		"text": "What?! Why not?"
+	},
+	{
+		"speaker": "####",
+		"portrait": "####",
+		"text": "Haven't you realized? I'm not real. Just like this place, I only exist in your head."
+	},
+	{
+		"speaker": "The Boy",
+		"portrait": "The Boy",
+		"text": "B-but... I see you every night before I sleep. You fight off the monsters!"
+	},
+	{
+		"speaker": "####",
+		"portrait": "####",
+		"text": "You imagined me whenever you were scared. Every battle we fought? That was all you. You're your own hero."
+	},
+	{
+		"speaker": "The Boy",
+		"portrait": "The Boy",
+		"text": "I... I don't know what to say. Having you around made me feel safe."
+	},
+	{
+		"speaker": "####",
+		"portrait": "####",
+		"text": "Portal's closing, kid. Time to wake up. Go."
+	}
+])
 	await DialogueManager.dialogue_ended
 
 	# P1 walks into the portal and P2 disappears
@@ -835,6 +848,7 @@ func _on_player_died() -> void:
 	PlayerStats.reset()
 	level_two_hearts_dialogue_shown = false
 	level_one_heart_dialogue_shown = false
+	flower_pot_dialogue_shown = false
 	if level == 2:
 		level2_one_heart_unleash_prompt_shown = false
 	_load_level(level)
@@ -915,3 +929,49 @@ func _on_p1_power_unleashed() -> void:
 	if is_instance_valid(player1):
 		player1.activate_full_power(5.0)
 	hud.show_message("IMMORTAL & 2x DAMAGE! (5s)", 5.0)
+
+
+func _connect_flower_pot() -> void:
+	var flower_pot = _find_flower_pot()
+	if flower_pot and flower_pot.has_signal("body_entered"):
+		flower_pot.monitoring = true
+		flower_pot.collision_mask = flower_pot.collision_mask | 1
+		if not flower_pot.body_entered.is_connected(_on_flower_pot_body_entered):
+			flower_pot.body_entered.connect(_on_flower_pot_body_entered)
+
+
+func _find_flower_pot() -> Area2D:
+	if not current_level_root:
+		return null
+	var pot = current_level_root.get_node_or_null("FlowerPot")
+	if pot and pot is Area2D:
+		return pot
+	pot = current_level_root.get_node_or_null("flowerPot")
+	if pot and pot is Area2D:
+		return pot
+	for child in current_level_root.get_children():
+		if child is Area2D and child.name.to_lower() in ["flowerpot", "flower_pot"]:
+			return child
+	var found = current_level_root.find_child("FlowerPot", true, false)
+	if not found:
+		found = current_level_root.find_child("flowerPot", true, false)
+	if not found:
+		found = current_level_root.find_child("*lower*ot*", true, false)
+	if found and found is Area2D:
+		return found
+	return null
+
+
+func _on_flower_pot_body_entered(body: Node2D) -> void:
+	if flower_pot_dialogue_shown or is_cutscene_running or is_ending_cutscene_running:
+		return
+	if not (body.name.begins_with("Player") or body.is_in_group("player")):
+		return
+	flower_pot_dialogue_shown = true
+	DialogueManager.start_dialogue([
+		{
+			"speaker": "####",
+			"portrait": "####",
+			"text": "Shush!!! The Big Dude is near. Follow Me!!!"
+		}
+	])
