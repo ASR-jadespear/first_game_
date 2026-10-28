@@ -46,29 +46,58 @@ func _ready() -> void:
 	attack_range.body_exited.connect(_on_attack_range_body_exited)
 	hit_box.body_entered.connect(_on_hit_box_body_entered)
 	attack_timer.timeout.connect(_on_attack_timer_timeout)
+	if has_node("/root/DialogueManager"):
+		DialogueManager.dialogue_started.connect(_on_dialogue_started)
+		DialogueManager.dialogue_ended.connect(_on_dialogue_ended)
 	call_deferred("_init_overlapping_targets")
 
 func _init_overlapping_targets() -> void:
+	_refresh_overlapping_targets()
+
+func _refresh_overlapping_targets() -> void:
 	if not is_alive:
 		return
 	if sight:
+		targets_in_sight.clear()
 		for body in sight.get_overlapping_bodies():
-			if body.is_in_group("player") or body.name.begins_with("Player"):
-				if body not in targets_in_sight:
-					targets_in_sight.append(body)
+			if (body.is_in_group("player") or body.name.begins_with("Player")) and body.get("alive") != false:
+				targets_in_sight.append(body)
 		_update_ninja_target()
 	if attack_range:
+		targets_in_attack_range.clear()
 		for body in attack_range.get_overlapping_bodies():
-			if body.is_in_group("player") or body.name.begins_with("Player"):
-				if body not in targets_in_attack_range:
-					targets_in_attack_range.append(body)
+			if (body.is_in_group("player") or body.name.begins_with("Player")) and body.get("alive") != false:
+				targets_in_attack_range.append(body)
 		player_in_attack_range = not targets_in_attack_range.is_empty()
+
+func _on_dialogue_started() -> void:
+	if is_attacking:
+		is_attacking = false
+		has_hit_in_current_attack = false
+		if hit_box:
+			hit_box.monitoring = false
+	velocity = Vector2.ZERO
+	if is_alive and animated_sprite_2d and animated_sprite_2d.animation != "die":
+		play_animation("idle", last_direction)
+
+func _on_dialogue_ended() -> void:
+	if is_alive:
+		is_attacking = false
+		has_hit_in_current_attack = false
+		if hit_box:
+			hit_box.monitoring = false
+		_refresh_overlapping_targets()
 
 func _physics_process(delta: float) -> void:
 	if not is_alive:
 		return
 
 	if has_node("/root/DialogueManager") and DialogueManager.is_active:
+		if is_attacking:
+			is_attacking = false
+			has_hit_in_current_attack = false
+			if hit_box:
+				hit_box.monitoring = false
 		velocity = Vector2.ZERO
 		if animated_sprite_2d and animated_sprite_2d.animation != "die":
 			play_animation("idle", last_direction)
@@ -84,9 +113,15 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if is_attacking:
-		velocity = velocity.move_toward(Vector2.ZERO, 500.0 * delta)
-		move_and_slide()
-		return
+		if animated_sprite_2d and not animated_sprite_2d.animation.begins_with("attack"):
+			is_attacking = false
+			has_hit_in_current_attack = false
+			if hit_box:
+				hit_box.monitoring = false
+		else:
+			velocity = velocity.move_toward(Vector2.ZERO, 500.0 * delta)
+			move_and_slide()
+			return
 
 	if target:
 		if not is_instance_valid(target) or target.get("alive") == false:

@@ -6,6 +6,8 @@
 [ext_resource type="AudioStream" uid="uid://cssq77plloh73" path="res://assets/audio/Music.wav" id="4_q6pqo"]
 [ext_resource type="PackedScene" uid="uid://c5pau5emenu01" path="res://scns/pause_menu.tscn" id="5_pause"]
 [ext_resource type="PackedScene" uid="uid://c7v1ct0ryscr0" path="res://scns/victory_screen.tscn" id="6_victory"]
+[ext_resource type="PackedScene" uid="uid://b6startscrn01" path="res://scns/start_screen.tscn" id="7_start"]
+[ext_resource type="PackedScene" uid="uid://d4noticscrn01" path="res://scns/notice_screen.tscn" id="8_notice"]
 
 [node name="Main" type="Node2D" unique_id=1529746188]
 script = ExtResource("1_q6pqo")
@@ -14,6 +16,10 @@ script = ExtResource("1_q6pqo")
 position = Vector2(125, 87)
 
 [node name="HUD" parent="." unique_id=1656482185 instance=ExtResource("3_3nmg6")]
+
+[node name="StartScreen" parent="." unique_id=90188895 instance=ExtResource("7_start")]
+
+[node name="NoticeScreen" parent="." unique_id=90188896 instance=ExtResource("8_notice")]
 
 [node name="PauseMenu" parent="." unique_id=90188893 instance=ExtResource("5_pause")]
 

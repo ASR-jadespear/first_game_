@@ -2,11 +2,16 @@ extends CanvasLayer
 
 signal resume_game
 signal restart_level
+signal return_to_main_menu
 
 @onready var root: Control = $Root
 @onready var resume_btn: Button = %ResumeBtn
 @onready var restart_btn: Button = %RestartBtn
+@onready var main_menu_btn: Button = %MainMenuBtn
 @onready var quit_btn: Button = %QuitBtn
+@onready var confirm_dialog: Control = %ConfirmDialog
+@onready var confirm_yes_btn: Button = %ConfirmYesBtn
+@onready var confirm_no_btn: Button = %ConfirmNoBtn
 
 @onready var master_slider: HSlider = %MasterSlider
 @onready var master_val_label: Label = %MasterValLabel
@@ -21,6 +26,7 @@ signal restart_level
 @onready var ui_sound: AudioStreamPlayer = $UISound
 
 var is_paused: bool = false
+var can_pause: bool = true
 var _audio_ready: bool = false
 
 func _ready() -> void:
@@ -32,13 +38,20 @@ func _ready() -> void:
 	# Connect buttons
 	resume_btn.pressed.connect(_on_resume_pressed)
 	restart_btn.pressed.connect(_on_restart_pressed)
+	main_menu_btn.pressed.connect(_on_main_menu_pressed)
 	quit_btn.pressed.connect(_on_quit_pressed)
+	confirm_yes_btn.pressed.connect(_on_confirm_yes_pressed)
+	confirm_no_btn.pressed.connect(_on_confirm_no_pressed)
+
+	if confirm_dialog:
+		confirm_dialog.visible = false
 
 	# Sound on button hover & focus
-	for btn in [resume_btn, restart_btn, quit_btn]:
-		btn.mouse_entered.connect(_play_ui_hover)
-		btn.focus_entered.connect(_play_ui_hover)
-		btn.pressed.connect(_play_ui_select)
+	for btn in [resume_btn, restart_btn, main_menu_btn, quit_btn, confirm_yes_btn, confirm_no_btn]:
+		if btn:
+			btn.mouse_entered.connect(_play_ui_hover)
+			btn.focus_entered.connect(_play_ui_hover)
+			btn.pressed.connect(_play_ui_select)
 
 	# Connect sliders
 	master_slider.value_changed.connect(_on_master_slider_changed)
@@ -58,10 +71,15 @@ func _ready() -> void:
 	)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if not can_pause:
+		return
 	if event.is_action_pressed("ui_cancel") or (
 		event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE
 	):
-		toggle_pause()
+		if is_paused and confirm_dialog and confirm_dialog.visible:
+			_close_confirm_dialog()
+		else:
+			toggle_pause()
 		get_viewport().set_input_as_handled()
 
 func toggle_pause() -> void:
@@ -74,8 +92,8 @@ func pause() -> void:
 	is_paused = true
 	get_tree().paused = true
 	visible = true
-
-	# Focus first button for keyboard/gamepad navigation
+	if confirm_dialog:
+		confirm_dialog.visible = false
 	resume_btn.grab_focus()
 
 	# Smooth animate menu entrance
@@ -102,6 +120,38 @@ func _on_restart_pressed() -> void:
 	visible = false
 	root.modulate.a = 0.0
 	restart_level.emit()
+
+func _on_main_menu_pressed() -> void:
+	if not confirm_dialog:
+		return
+	confirm_dialog.modulate.a = 0.0
+	confirm_dialog.visible = true
+	var tween = create_tween()
+	tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.tween_property(confirm_dialog, "modulate:a", 1.0, 0.15)
+	confirm_no_btn.grab_focus()
+
+func _close_confirm_dialog() -> void:
+	if not confirm_dialog:
+		return
+	var tween = create_tween()
+	tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.tween_property(confirm_dialog, "modulate:a", 0.0, 0.1)
+	await tween.finished
+	confirm_dialog.visible = false
+	main_menu_btn.grab_focus()
+
+func _on_confirm_no_pressed() -> void:
+	_close_confirm_dialog()
+
+func _on_confirm_yes_pressed() -> void:
+	is_paused = false
+	get_tree().paused = false
+	visible = false
+	if confirm_dialog:
+		confirm_dialog.visible = false
+	root.modulate.a = 0.0
+	return_to_main_menu.emit()
 
 func _sync_slider(bus_name: String, slider: HSlider, label: Label) -> void:
 	var bus_idx = AudioServer.get_bus_index(bus_name)

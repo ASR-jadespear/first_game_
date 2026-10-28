@@ -94,8 +94,9 @@ func _spawn_drops() -> void:
 		
 	for i in range(drop_count):
 		var drop = drop_scene.instantiate()
-		var offset_x = (i - (drop_count - 1.0) / 2.0) * 50.0
-		var target_pos = global_position + Vector2(offset_x, 60.0)
+		drop.z_index = 2
+		var offset_x = (i - (drop_count - 1.0) / 2.0) * 55.0
+		var target_pos = global_position + Vector2(offset_x, 78.0)
 		drop.position = global_position
 		spawn_parent.call_deferred("add_child", drop)
 		_animate_drop_deferred(drop, target_pos)
@@ -105,13 +106,14 @@ func _animate_drop_deferred(drop: Node2D, target_pos: Vector2) -> void:
 	if not is_instance_valid(drop):
 		return
 	
+	drop.z_index = 2
 	var col: CollisionShape2D = drop.get_node_or_null("CollisionShape2D")
 	if col:
 		col.set_deferred("disabled", true)
 		
 	drop.global_position = global_position + Vector2(0, -10)
 	var tween = create_tween()
-	var mid_y = global_position.y - 40.0
+	var mid_y = global_position.y - 45.0
 	tween.tween_property(drop, "global_position", Vector2(target_pos.x, mid_y), 0.18).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
 	tween.tween_property(drop, "global_position", target_pos, 0.22).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_BOUNCE)
 	await tween.finished

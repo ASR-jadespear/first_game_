@@ -1,0 +1,71 @@
+[gd_scene format=3 uid="uid://d4noticscrn01"]
+
+[ext_resource type="Script" uid="uid://d4noticscrn02" path="res://scripts/notice_screen.gd" id="1_script"]
+[ext_resource type="FontFile" uid="uid://bhmdkp531fd3f" path="res://assets/images/font/NormalFont.ttf" id="2_font"]
+
+[node name="NoticeScreen" type="CanvasLayer" unique_id=90188896]
+process_mode = 3
+layer = 85
+script = ExtResource("1_script")
+
+[node name="Root" type="Control" parent="." unique_id=181906213]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="Root" unique_id=489347210]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="Root" unique_id=126119009]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Root/CenterContainer" unique_id=502527295]
+custom_minimum_size = Vector2(980, 0)
+layout_mode = 2
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="NoticeLabel" type="Label" parent="Root/CenterContainer/VBoxContainer" unique_id=149172810]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.94, 0.9, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.08, 0.08, 1)
+theme_override_constants/outline_size = 4
+theme_override_constants/line_spacing = 16
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 32
+text = "This game is best played with 2 players, each playing one level.
+
+Feel free to enjoy the story as well"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="PromptLabel" type="Label" parent="Root/CenterContainer/VBoxContainer" unique_id=149172811]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.45, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.08, 0.08, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 20
+text = "Press SPACE / ENTER or Click to continue"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[connection signal="gui_input" from="Root" to="." method="_on_gui_input"]
+

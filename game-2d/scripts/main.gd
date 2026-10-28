@@ -23,19 +23,42 @@ var is_ending_cutscene_running: bool = false
 var flower_pot_dialogue_shown: bool = false
 var _exit_warning_active: bool = false
 var _is_dying: bool = false
+var _previous_health: int = 100
 
 
 func _ready() -> void:
 	current_level_root = get_node_or_null("LevelRoot")
 	if has_node("PauseMenu"):
 		$PauseMenu.restart_level.connect(_on_restart_level)
+		$PauseMenu.return_to_main_menu.connect(_on_return_to_main_menu)
 	if has_node("VictoryScreen"):
 		$VictoryScreen.restart_game.connect(_on_restart_game)
+	if has_node("StartScreen"):
+		$StartScreen.start_game.connect(_on_start_game)
+		if has_node("PauseMenu"):
+			$PauseMenu.can_pause = false
+		if hud:
+			hud.visible = false
+		if current_level_root:
+			current_level_root.visible = false
+		$StartScreen.open()
+	else:
+		_load_level(level)
+
+
+func _on_start_game() -> void:
+	if has_node("NoticeScreen"):
+		await $NoticeScreen.show_notice()
+	if hud:
+		hud.visible = true
+	if has_node("PauseMenu"):
+		$PauseMenu.can_pause = true
 	_load_level(level)
 
 
 func _on_restart_level() -> void:
 	PlayerStats.reset()
+	_previous_health = PlayerStats.health
 	_is_dying = false
 	level_two_hearts_dialogue_shown = false
 	level_one_heart_dialogue_shown = false
@@ -51,6 +74,7 @@ func _on_restart_level() -> void:
 
 func _on_restart_game() -> void:
 	PlayerStats.reset()
+	_previous_health = PlayerStats.health
 	_is_dying = false
 	level1_intro_played = false
 	first_enemy_prompt_shown = false
@@ -66,7 +90,21 @@ func _on_restart_game() -> void:
 	level2_one_heart_unleash_prompt_shown = false
 	is_ending_cutscene_running = false
 	level = 1
-	_load_level(level)
+	if has_node("StartScreen"):
+		if current_level_root:
+			current_level_root.queue_free()
+			current_level_root = null
+		if hud:
+			hud.visible = false
+		if has_node("PauseMenu"):
+			$PauseMenu.can_pause = false
+		$StartScreen.open()
+	else:
+		_load_level(level)
+
+
+func _on_return_to_main_menu() -> void:
+	_on_restart_game()
 
 
 func _process(_delta: float) -> void:
@@ -109,6 +147,7 @@ func _show_combat_tutorial_dialogue() -> void:
 
 func _load_level(level_number: int) -> void:
 	_is_transitioning = false
+	_previous_health = PlayerStats.health
 	level_two_hearts_dialogue_shown = false
 	level_one_heart_dialogue_shown = false
 	flower_pot_dialogue_shown = false
@@ -182,7 +221,7 @@ func _setup_level(level_root: Node) -> void:
 			if not player2.died.is_connected(_on_player_died):
 				player2.died.connect(_on_player_died)
 
-		hud.show_message("Level 2: Controls given to Player 1!", "Protect Player 2 and clear the dungeon!")
+		hud.show_message("Level 2: Controls given to Player 1!", 3.0)
 		if not level2_intro_dialogue_shown:
 			_start_level2_intro()
 
@@ -314,7 +353,7 @@ func _start_level1_cutscene() -> void:
 		{
 			"speaker": "The Boy",
 			"portrait": "02",
-			"text": "What the!!!! Who are you … Wait!! You are #### from “The Courageous”. I was watching your final episode last night."
+			"text": "What the!!!! Who are you … Wait!! You are #### from “The Courages”. I was watching your final episode last night."
 		},
 		{
 			"speaker": "####",
@@ -377,7 +416,7 @@ func _start_level1_cutscene() -> void:
 		{
 			"speaker": "####",
 			"portrait": "30",
-			"text": "Dont you remember.. I am the hero from “The Courageous” , and you my biggest fan, ….the hell you can do this. Just follow my lead and you’ll be back home in no time."
+			"text": "Dont you remember.. I am the hero from “The Courages” , and you my biggest fan, ….the hell you can do this. Just follow my lead and you’ll be back home in no time."
 		},
 		{
 			"speaker": "The Boy",
@@ -890,6 +929,7 @@ func _on_player_died() -> void:
 	await hud.fade(1.0)
 	await hud.show_death_message(chosen_msg, 2.2)
 	PlayerStats.reset()
+	_previous_health = PlayerStats.health
 	level_two_hearts_dialogue_shown = false
 	level_one_heart_dialogue_shown = false
 	flower_pot_dialogue_shown = false
@@ -902,10 +942,17 @@ func _on_player_died() -> void:
 
 
 func _on_player_health_changed(new_health: int) -> void:
+	var old_health = _previous_health
+	_previous_health = new_health
+
+	# ONLY process low-health warnings and emergency mechanics when health is GOING DOWN (taking damage)
+	if new_health >= old_health:
+		return
+
 	if is_cutscene_running or is_ending_cutscene_running or new_health <= 0 or (has_node("/root/DialogueManager") and DialogueManager.is_active):
 		return
 
-	# Level 2 special mechanic: P1 health goes down to one heart
+	# Level 2 special mechanic: P1 health goes down to one heart or below
 	if level == 2 and new_health <= 20 and not level2_one_heart_unleash_prompt_shown:
 		level2_one_heart_unleash_prompt_shown = true
 		level_one_heart_dialogue_shown = true

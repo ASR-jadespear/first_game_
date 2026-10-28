@@ -8,9 +8,11 @@
 size = Vector2(120, 96)
 
 [node name="HealthPickup" type="Area2D" unique_id=765575549]
+z_index = 2
 script = ExtResource("1_7ew85")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1735115380]
+z_index = 2
 scale = Vector2(8, 8)
 texture = ExtResource("1_1ew0d")
 

@@ -429,6 +429,7 @@ size = Vector2(47, 24)
 size = Vector2(68, 59)
 
 [node name="Player" type="CharacterBody2D" unique_id=564402815]
+z_index = 3
 script = ExtResource("1_pormh")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=487883253]

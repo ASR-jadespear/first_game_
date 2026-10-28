@@ -349,6 +349,13 @@ func trigger_handover(arriving_player: Node2D) -> void:
 
 
 func heal(amount: int) -> void:
+	if PlayerStats.health >= PlayerStats.max_health:
+		var hud = get_tree().get_first_node_in_group("hud")
+		if not hud:
+			hud = get_tree().root.find_child("HUD", true, false)
+		if hud and hud.has_method("show_message"):
+			hud.show_message("Health already full", 1.8)
+		return
 	var new_health = PlayerStats.apply_heal(amount)
 	health = new_health
 	health_changed.emit(health)
@@ -387,7 +394,9 @@ func activate_full_power(duration: float = 5.0) -> void:
 
 
 func take_damage(amount: int) -> void:
-	if is_immortal or not alive:
+	if is_immortal or not alive or in_cutscene:
+		return
+	if has_node("/root/DialogueManager") and DialogueManager.is_active:
 		return
 	if damage_cool_down and damage_cool_down.time_left > 0:
 		return

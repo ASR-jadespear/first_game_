@@ -44,16 +44,7 @@ texture_margin_top = 2.0
 texture_margin_right = 2.0
 texture_margin_bottom = 2.0
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_focus"]
-texture = ExtResource("8_focus")
-texture_margin_left = 2.0
-texture_margin_top = 2.0
-texture_margin_right = 2.0
-texture_margin_bottom = 2.0
-expand_margin_left = 2.0
-expand_margin_top = 2.0
-expand_margin_right = 2.0
-expand_margin_bottom = 2.0
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_btn_focus"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_slider"]
 texture = ExtResource("11_slider_bar")
@@ -132,7 +123,7 @@ theme_override_font_sizes/font_size = 40
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_norm")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_press")
 theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hov")
-theme_override_styles/focus = SubResource("StyleBoxTexture_btn_focus")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_focus")
 text = "Resume"
 
 [node name="RestartBtn" type="Button" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=307229644]
@@ -148,7 +139,7 @@ theme_override_font_sizes/font_size = 40
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_norm")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_press")
 theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hov")
-theme_override_styles/focus = SubResource("StyleBoxTexture_btn_focus")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_focus")
 text = "Restart Level"
 
 [node name="HSeparator2" type="HSeparator" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1191930267]
@@ -279,6 +270,22 @@ theme_override_icons/unchecked = ExtResource("13_chk_off")
 [node name="HSeparator3" type="HSeparator" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=129664229]
 layout_mode = 2
 
+[node name="MainMenuBtn" type="Button" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=902017138]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0.2, 0.15, 0.1, 1)
+theme_override_colors/font_hover_color = Color(0.05, 0.05, 0.05, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 40
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_norm")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_press")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hov")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_focus")
+text = "Main Menu"
+
 [node name="QuitBtn" type="Button" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=902017137]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 42)
@@ -292,8 +299,112 @@ theme_override_font_sizes/font_size = 40
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_norm")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_press")
 theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hov")
-theme_override_styles/focus = SubResource("StyleBoxTexture_btn_focus")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_focus")
 text = "Quit Game"
+
+[node name="ConfirmDialog" type="Control" parent="Root" unique_id=902017139]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dimmer" type="ColorRect" parent="Root/ConfirmDialog"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.03, 0.02, 0.02, 0.82)
+
+[node name="CenterContainer" type="CenterContainer" parent="Root/ConfirmDialog"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="Root/ConfirmDialog/CenterContainer"]
+custom_minimum_size = Vector2(460, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
+
+[node name="MarginContainer" type="MarginContainer" parent="Root/ConfirmDialog/CenterContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Root/ConfirmDialog/CenterContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Root/ConfirmDialog/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_colors/font_shadow_color = Color(0.9, 0.82, 0.55, 0.6)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 44
+text = "Return to Menu?"
+horizontal_alignment = 1
+
+[node name="Message" type="Label" parent="Root/ConfirmDialog/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.16, 0.12, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 22
+text = "Are you sure you want to return to the main menu? Any unsaved progress in this level will be lost."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="Root/ConfirmDialog/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Root/ConfirmDialog/CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="ConfirmYesBtn" type="Button" parent="Root/ConfirmDialog/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=902017140]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(170, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0.2, 0.15, 0.1, 1)
+theme_override_colors/font_hover_color = Color(0.05, 0.05, 0.05, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 36
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_norm")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_press")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hov")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_focus")
+text = "Yes"
+
+[node name="ConfirmNoBtn" type="Button" parent="Root/ConfirmDialog/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=902017141]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(170, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0.2, 0.15, 0.1, 1)
+theme_override_colors/font_hover_color = Color(0.05, 0.05, 0.05, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 36
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_norm")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_press")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hov")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_focus")
+text = "Cancel"
 
 [node name="UISound" type="AudioStreamPlayer" parent="." unique_id=835897104]
 process_mode = 3

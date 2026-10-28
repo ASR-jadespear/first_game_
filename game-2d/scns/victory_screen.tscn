@@ -39,16 +39,7 @@ texture_margin_top = 2.0
 texture_margin_right = 2.0
 texture_margin_bottom = 2.0
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_focus"]
-texture = ExtResource("7_focus")
-texture_margin_left = 2.0
-texture_margin_top = 2.0
-texture_margin_right = 2.0
-texture_margin_bottom = 2.0
-expand_margin_left = 2.0
-expand_margin_top = 2.0
-expand_margin_right = 2.0
-expand_margin_bottom = 2.0
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_btn_focus"]
 
 [node name="VictoryScreen" type="CanvasLayer" unique_id=90188894]
 process_mode = 3
@@ -132,7 +123,7 @@ theme_override_font_sizes/font_size = 38
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_norm")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_press")
 theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hov")
-theme_override_styles/focus = SubResource("StyleBoxTexture_btn_focus")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_focus")
 text = "Restart"
 
 [node name="ExitBtn" type="Button" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1849089201]
@@ -148,7 +139,7 @@ theme_override_font_sizes/font_size = 38
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_norm")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_press")
 theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hov")
-theme_override_styles/focus = SubResource("StyleBoxTexture_btn_focus")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_focus")
 text = "Exit"
 
 [node name="UISound" type="AudioStreamPlayer" parent="." unique_id=744839201]

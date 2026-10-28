@@ -18,6 +18,7 @@ var _message_tween: Tween = null
 var _handover_tween: Tween = null
 
 func _ready() -> void:
+	add_to_group("hud")
 	if has_node("/root/PlayerStats"):
 		var stats = get_node("/root/PlayerStats")
 		if stats.has_signal("health_changed") and not stats.health_changed.is_connected(_update_health):

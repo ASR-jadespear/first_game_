@@ -1,0 +1,309 @@
+[gd_scene format=3 uid="uid://b6startscrn01"]
+
+[ext_resource type="Script" uid="uid://b6startscrn02" path="res://scripts/start_screen.gd" id="1_start"]
+[ext_resource type="Texture2D" uid="uid://lkt2psb4nsxt" path="res://assets/images/cutscenes/starting_screen.png" id="2_bg"]
+[ext_resource type="FontFile" uid="uid://bhmdkp531fd3f" path="res://assets/images/font/NormalFont.ttf" id="3_font"]
+[ext_resource type="Texture2D" uid="uid://df2uuv82gf2p" path="res://assets/images/UI/slider_progress_hover.png" id="4_panel"]
+[ext_resource type="Texture2D" uid="uid://4a3kn7280h0o" path="res://assets/images/UI/button_normal.png" id="5_btn_norm"]
+[ext_resource type="Texture2D" uid="uid://b26qdo810vu6m" path="res://assets/images/UI/button_hover.png" id="6_btn_hov"]
+[ext_resource type="Texture2D" uid="uid://bfuo3s7hp0clv" path="res://assets/images/UI/button_pressed.png" id="7_btn_press"]
+[ext_resource type="AudioStream" uid="uid://dlwg5kpqe1jel" path="res://assets/audio/health_pickup.wav" id="9_sound"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_norm"]
+texture = ExtResource("5_btn_norm")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_press"]
+texture = ExtResource("7_btn_press")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_hov"]
+texture = ExtResource("6_btn_hov")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_btn_focus"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_panel"]
+texture = ExtResource("4_panel")
+texture_margin_left = 4.0
+texture_margin_top = 4.0
+texture_margin_right = 4.0
+texture_margin_bottom = 4.0
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+
+[node name="StartScreen" type="CanvasLayer" unique_id=936139103]
+process_mode = 3
+layer = 80
+script = ExtResource("1_start")
+
+[node name="Root" type="Control" parent="." unique_id=1158461211]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="TextureRect" parent="Root" unique_id=459308406]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="RightSideMenu" type="Control" parent="Root" unique_id=813483537]
+layout_mode = 1
+anchor_left = 0.54
+anchor_top = 0.06
+anchor_right = 0.96
+anchor_bottom = 0.94
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="Root/RightSideMenu" unique_id=372616179]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Root/RightSideMenu/CenterContainer" unique_id=1924251369]
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Title" type="Label" parent="Root/RightSideMenu/CenterContainer/VBoxContainer" unique_id=911820952]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.16, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
+theme_override_colors/font_outline_color = Color(0.12, 0.07, 0.02, 1)
+theme_override_constants/shadow_offset_x = 4
+theme_override_constants/shadow_offset_y = 4
+theme_override_constants/outline_size = 12
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 78
+text = "The Courages"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="Root/RightSideMenu/CenterContainer/VBoxContainer" unique_id=412349120]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="ButtonsVBox" type="VBoxContainer" parent="Root/RightSideMenu/CenterContainer/VBoxContainer" unique_id=704336]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="StartBtn" type="Button" parent="Root/RightSideMenu/CenterContainer/VBoxContainer/ButtonsVBox" unique_id=1668787392]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(340, 56)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.14, 0.1, 0.06, 1)
+theme_override_colors/font_focus_color = Color(0.02, 0.02, 0.02, 1)
+theme_override_colors/font_pressed_color = Color(0.25, 0.18, 0.1, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 38
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_norm")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_press")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hov")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_focus")
+text = "Start Game"
+
+[node name="AboutBtn" type="Button" parent="Root/RightSideMenu/CenterContainer/VBoxContainer/ButtonsVBox" unique_id=1333747547]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(340, 56)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.14, 0.1, 0.06, 1)
+theme_override_colors/font_focus_color = Color(0.02, 0.02, 0.02, 1)
+theme_override_colors/font_pressed_color = Color(0.25, 0.18, 0.1, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 34
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_norm")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_press")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hov")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_focus")
+text = "About & How to Play"
+
+[node name="ExitBtn" type="Button" parent="Root/RightSideMenu/CenterContainer/VBoxContainer/ButtonsVBox" unique_id=1306838785]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(340, 56)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.14, 0.1, 0.06, 1)
+theme_override_colors/font_focus_color = Color(0.02, 0.02, 0.02, 1)
+theme_override_colors/font_pressed_color = Color(0.25, 0.18, 0.1, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 38
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_norm")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_press")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hov")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_focus")
+text = "Exit"
+
+[node name="SpacerBottom" type="Control" parent="Root/RightSideMenu/CenterContainer/VBoxContainer" unique_id=1276509423]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+
+[node name="HintLabel" type="Label" parent="Root/RightSideMenu/CenterContainer/VBoxContainer" unique_id=1723664207]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.74, 0.62, 0.75)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 18
+text = "Press SPACE / ENTER or Click"
+horizontal_alignment = 1
+
+[node name="AboutDialog" type="Control" parent="Root" unique_id=1130803431]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dimmer" type="ColorRect" parent="Root/AboutDialog" unique_id=1630320893]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.03, 0.02, 0.8)
+
+[node name="CenterContainer" type="CenterContainer" parent="Root/AboutDialog" unique_id=1649369735]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="Root/AboutDialog/CenterContainer" unique_id=229583377]
+custom_minimum_size = Vector2(800, 560)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
+
+[node name="MarginContainer" type="MarginContainer" parent="Root/AboutDialog/CenterContainer/PanelContainer" unique_id=1376980260]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 24
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Root/AboutDialog/CenterContainer/PanelContainer/MarginContainer" unique_id=469181292]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="AboutTitle" type="Label" parent="Root/AboutDialog/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=2064082600]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.14, 0.1, 0.06, 1)
+theme_override_colors/font_shadow_color = Color(0.9, 0.82, 0.55, 0.6)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 46
+text = "About 'The Courages'"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="Root/AboutDialog/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1526375581]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Root/AboutDialog/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=2012051472]
+custom_minimum_size = Vector2(736, 360)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="ContentVBox" type="VBoxContainer" parent="Root/AboutDialog/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ScrollContainer" unique_id=1164665123]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 14
+
+[node name="StoryHeading" type="Label" parent="Root/AboutDialog/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ScrollContainer/ContentVBox" unique_id=1354125240]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.16, 0.06, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 28
+text = "✦ Story Overview ✦"
+horizontal_alignment = 1
+
+[node name="StoryText" type="Label" parent="Root/AboutDialog/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ScrollContainer/ContentVBox" unique_id=293302144]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.14, 0.1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 20
+text = "You awaken in a serene, sun-drenched field blooming with flowers, having fallen asleep peacefully in your bed the previous night.
+
+Before you can fathom where you are or why you are here, monstrous creatures emerge! Just in the nick of time, the heroic champion from your favorite television show—'The Courages'—leaps into reality to protect you.
+
+Trapped together inside a vivid lucid dreamscape, you two must unite, purge the lands of evil forces, and uncover the strength within yourself to find the way back home.
+
+	- Made by Team NotSoLocked!n (Rafi & Anika) for Gamejam+ 2026"
+autowrap_mode = 2
+
+[node name="HSeparator2" type="HSeparator" parent="Root/AboutDialog/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ScrollContainer/ContentVBox" unique_id=188229218]
+layout_mode = 2
+
+[node name="ControlsHeading" type="Label" parent="Root/AboutDialog/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ScrollContainer/ContentVBox" unique_id=1625617185]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.16, 0.06, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 28
+text = "✦ How to Play ✦"
+horizontal_alignment = 1
+
+[node name="ControlsText" type="Label" parent="Root/AboutDialog/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ScrollContainer/ContentVBox" unique_id=1191605546]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.14, 0.1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 20
+text = "• Move: W, A, S, D or Arrow Keys
+• Attack: SPACE or ENTER to swing your sword
+• Progression: Slay all monsters in the area to unlock the portal to the next realm!
+• Companion Bonds: In Level 1, follow the hero's lead. In Level 2, take the lead yourself! Both heroes share vitality—guard each other carefully!
+• Pause & Options: Press ESC anytime during gameplay to adjust sound volume, toggle fullscreen, or restart."
+autowrap_mode = 2
+
+[node name="HSeparator3" type="HSeparator" parent="Root/AboutDialog/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=934078713]
+layout_mode = 2
+
+[node name="CloseAboutCenter" type="CenterContainer" parent="Root/AboutDialog/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=545992790]
+layout_mode = 2
+
+[node name="CloseAboutBtn" type="Button" parent="Root/AboutDialog/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/CloseAboutCenter" unique_id=1805249962]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.14, 0.1, 0.06, 1)
+theme_override_colors/font_focus_color = Color(0.02, 0.02, 0.02, 1)
+theme_override_colors/font_pressed_color = Color(0.25, 0.18, 0.1, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 34
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_norm")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_press")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hov")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_focus")
+text = "Back to Menu"
+
+[node name="UISound" type="AudioStreamPlayer" parent="." unique_id=2045272065]
+stream = ExtResource("9_sound")
+bus = &"SFX"
