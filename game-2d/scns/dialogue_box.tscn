@@ -3,9 +3,11 @@
 [ext_resource type="Script" uid="uid://bs2bdexblty7f" path="res://scripts/dialogue_box.gd" id="1_dlg"]
 [ext_resource type="Texture2D" uid="uid://7y7sxhw7ctqm" path="res://assets/images/UI/dialoguebox.png" id="2_dbox"]
 [ext_resource type="Texture2D" uid="uid://iuixkicop83t" path="res://assets/images/UI/nine_path_bg.png" id="3_bg"]
-[ext_resource type="FontFile" uid="uid://bav0mfec8w51p" path="res://assets/images/font/NormalFont.ttf" id="4_font"]
-[ext_resource type="Texture2D" uid="uid://blwmski8qpbjr" path="res://assets/images/UI/dialogue_next.png" id="5_next"]
+[ext_resource type="FontFile" uid="uid://bhmdkp531fd3f" path="res://assets/images/font/NormalFont.ttf" id="4_font"]
 [ext_resource type="AudioStream" uid="uid://dlwg5kpqe1jel" path="res://assets/audio/health_pickup.wav" id="6_audio"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_k51bk"]
+load_path = "res://.godot/imported/arrow_right.png-5617230afa90b3bc1f188ee0fc029703.ctex"
 
 [node name="DialogueBox" type="CanvasLayer" unique_id=2031737696]
 process_mode = 3
@@ -93,7 +95,7 @@ theme_override_colors/font_shadow_color = Color(0.92, 0.86, 0.78, 1)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 29
 text = "Speaker"
 
 [node name="DialogueLabel" type="RichTextLabel" parent="Root/BoxContainer" unique_id=1437712846]
@@ -106,7 +108,7 @@ offset_bottom = 194.0
 mouse_filter = 1
 theme_override_colors/default_color = Color(0.16, 0.12, 0.1, 1)
 theme_override_fonts/normal_font = ExtResource("4_font")
-theme_override_font_sizes/normal_font_size = 20
+theme_override_font_sizes/normal_font_size = 27
 bbcode_enabled = true
 text = "Dialogue text will appear here."
 scroll_active = false
@@ -114,26 +116,13 @@ scroll_active = false
 [node name="NextButton" type="TextureButton" parent="Root/BoxContainer" unique_id=1600331070]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 780.0
-offset_top = 170.0
-offset_right = 816.0
-offset_bottom = 206.0
-texture_normal = ExtResource("5_next")
+offset_left = 778.0
+offset_top = 162.0
+offset_right = 812.0
+offset_bottom = 197.0
+texture_normal = SubResource("CompressedTexture2D_k51bk")
 ignore_texture_size = true
 stretch_mode = 5
-
-[node name="NextHintLabel" type="Label" parent="Root/BoxContainer" unique_id=1902971435]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 660.0
-offset_top = 176.0
-offset_right = 774.0
-offset_bottom = 202.0
-theme_override_colors/font_color = Color(0.45, 0.35, 0.25, 1)
-theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 14
-text = "[Click / E]"
-horizontal_alignment = 2
 
 [node name="TypeSound" type="AudioStreamPlayer" parent="." unique_id=561486331]
 process_mode = 3

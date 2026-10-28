@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bfkw6s67rbrdp"
-path="res://.godot/imported/mirror.png-0b78bf855c54d129c552b6c549b7a424.ctex"
+uid="uid://d3dpm2k7syu3m"
+path="res://.godot/imported/SpriteSheet.png-11675342836418498094a2d1330cf15e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/images/objects/mirror.png"
-dest_files=["res://.godot/imported/mirror.png-0b78bf855c54d129c552b6c549b7a424.ctex"]
+source_file="res://assets/images/enemies/NinjaGreen/SpriteSheet.png"
+dest_files=["res://.godot/imported/SpriteSheet.png-11675342836418498094a2d1330cf15e.ctex"]
 
 [params]
 

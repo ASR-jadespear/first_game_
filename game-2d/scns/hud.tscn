@@ -2,6 +2,17 @@
 
 [ext_resource type="Script" uid="uid://b8sih6loecnpg" path="res://scripts/hud.gd" id="1_55y6n"]
 [ext_resource type="Texture2D" uid="uid://bk1pd760i6il0" path="res://assets/images/UI/Heart_full.png" id="2_aml1r"]
+[ext_resource type="FontFile" uid="uid://bhmdkp531fd3f" path="res://assets/images/font/NormalFont.ttf" id="3_font"]
+[ext_resource type="Texture2D" uid="uid://df2uuv82gf2p" path="res://assets/images/UI/slider_progress_hover.png" id="4_panel"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_panel"]
+texture = ExtResource("4_panel")
+texture_margin_left = 4.0
+texture_margin_top = 4.0
+texture_margin_right = 4.0
+texture_margin_bottom = 4.0
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
 
 [sub_resource type="GDScript" id="GDScript_aml1r"]
 script/source = "extends ColorRect
@@ -48,6 +59,70 @@ metadata/_edit_use_anchors_ = true
 layout_mode = 2
 texture = ExtResource("2_aml1r")
 stretch_mode = 2
+
+[node name="MessageLabel" type="Label" parent="." unique_id=987123456]
+visible = false
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -400.0
+offset_top = 30.0
+offset_right = 400.0
+offset_bottom = 80.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.08, 0.05, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HandoverNotice" type="PanelContainer" parent="." unique_id=892348123]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -340.0
+offset_top = -80.0
+offset_right = 340.0
+offset_bottom = 80.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
+
+[node name="MarginContainer" type="MarginContainer" parent="HandoverNotice" unique_id=892348124]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 22
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HandoverNotice/MarginContainer" unique_id=892348125]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="HandoverNotice/MarginContainer/VBoxContainer" unique_id=892348126]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.08, 0.05, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 40
+text = "Give the controls to your friend!"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="HandoverNotice/MarginContainer/VBoxContainer" unique_id=892348127]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.08, 0.05, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 24
+text = "Player 2 is now in control! Protect each other!"
+horizontal_alignment = 1
 
 [node name="FadeOverlay" type="ColorRect" parent="." unique_id=70507110]
 modulate = Color(1, 1, 1, 0)

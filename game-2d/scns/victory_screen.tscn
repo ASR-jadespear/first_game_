@@ -1,0 +1,157 @@
+[gd_scene format=3 uid="uid://c7v1ct0ryscr0"]
+
+[ext_resource type="Script" uid="uid://c7v1ct0ryscr1" path="res://scripts/victory_screen.gd" id="1_script"]
+[ext_resource type="FontFile" uid="uid://bhmdkp531fd3f" path="res://assets/images/font/NormalFont.ttf" id="2_font"]
+[ext_resource type="Texture2D" uid="uid://df2uuv82gf2p" path="res://assets/images/UI/slider_progress_hover.png" id="3_panel"]
+[ext_resource type="Texture2D" uid="uid://4a3kn7280h0o" path="res://assets/images/UI/button_normal.png" id="4_btn_norm"]
+[ext_resource type="Texture2D" uid="uid://b26qdo810vu6m" path="res://assets/images/UI/button_hover.png" id="5_btn_hov"]
+[ext_resource type="Texture2D" uid="uid://bfuo3s7hp0clv" path="res://assets/images/UI/button_pressed.png" id="6_btn_press"]
+[ext_resource type="Texture2D" uid="uid://ct8n72qgoqeh2" path="res://assets/images/UI/nine_path_focus.png" id="7_focus"]
+[ext_resource type="AudioStream" uid="uid://dlwg5kpqe1jel" path="res://assets/audio/health_pickup.wav" id="8_sound"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_panel"]
+texture = ExtResource("3_panel")
+texture_margin_left = 4.0
+texture_margin_top = 4.0
+texture_margin_right = 4.0
+texture_margin_bottom = 4.0
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_norm"]
+texture = ExtResource("4_btn_norm")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_press"]
+texture = ExtResource("6_btn_press")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_hov"]
+texture = ExtResource("5_btn_hov")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_focus"]
+texture = ExtResource("7_focus")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
+expand_margin_left = 2.0
+expand_margin_top = 2.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
+
+[node name="VictoryScreen" type="CanvasLayer" unique_id=90188894]
+process_mode = 3
+layer = 110
+script = ExtResource("1_script")
+
+[node name="Root" type="Control" parent="." unique_id=171906213]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Overlay" type="ColorRect" parent="Root" unique_id=489347209]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.03, 0.02, 0.75)
+
+[node name="CenterContainer" type="CenterContainer" parent="Root" unique_id=126119008]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="Root/CenterContainer" unique_id=502527294]
+custom_minimum_size = Vector2(480, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
+
+[node name="MarginContainer" type="MarginContainer" parent="Root/CenterContainer/PanelContainer" unique_id=1078903100]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 32
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Root/CenterContainer/PanelContainer/MarginContainer" unique_id=1050755196]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1412366664]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_colors/font_shadow_color = Color(0.9, 0.8, 0.5, 0.6)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 56
+text = "Congratulations!"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1412366665]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.16, 0.12, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 28
+text = "You have defeated all enemies
+and completed the game!"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=744783005]
+layout_mode = 2
+
+[node name="RestartBtn" type="Button" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=307229645]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0.2, 0.15, 0.1, 1)
+theme_override_colors/font_hover_color = Color(0.05, 0.05, 0.05, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 38
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_norm")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_press")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hov")
+theme_override_styles/focus = SubResource("StyleBoxTexture_btn_focus")
+text = "Restart"
+
+[node name="ExitBtn" type="Button" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1849089201]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0.2, 0.15, 0.1, 1)
+theme_override_colors/font_hover_color = Color(0.05, 0.05, 0.05, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 38
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_norm")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_press")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hov")
+theme_override_styles/focus = SubResource("StyleBoxTexture_btn_focus")
+text = "Exit"
+
+[node name="UISound" type="AudioStreamPlayer" parent="." unique_id=744839201]
+stream = ExtResource("8_sound")
+bus = &"SFX"
+

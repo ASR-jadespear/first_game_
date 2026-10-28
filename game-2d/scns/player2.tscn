@@ -1,7 +1,9 @@
 [gd_scene format=3 uid="uid://cu3ylnbtwx32o"]
 
-[ext_resource type="Script" path="res://scripts/npc_player2.gd" id="1_o3b4n"]
+[ext_resource type="Script" uid="uid://dw1dl11stpobu" path="res://scripts/player.gd" id="1_player_script"]
 [ext_resource type="Texture2D" uid="uid://7e7lulkfe3t0" path="res://assets/images/player/Player2.png" id="2_8uspe"]
+[ext_resource type="AudioStream" uid="uid://dc1gg3mhnbo4x" path="res://assets/audio/swordSwing.wav" id="3_sword"]
+[ext_resource type="AudioStream" uid="uid://dbxvph5ehkdlr" path="res://assets/audio/player_damage.wav" id="4_damage"]
 [ext_resource type="FontFile" path="res://assets/images/font/NormalFont.ttf" id="5_font"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pormh"]
@@ -424,11 +426,14 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wbivt"]
 size = Vector2(47, 24)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox"]
+size = Vector2(68, 59)
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_detect"]
 radius = 240.0
 
 [node name="Player2" type="CharacterBody2D" unique_id=564402815]
-script = ExtResource("1_o3b4n")
+script = ExtResource("1_player_script")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=487883253]
 position = Vector2(1.0000038, 1)
@@ -440,6 +445,34 @@ autoplay = "idle_down"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1976492444]
 position = Vector2(-1.5, 14)
 shape = SubResource("RectangleShape2D_wbivt")
+
+[node name="SwingSword" type="AudioStreamPlayer2D" parent="." unique_id=1491047094]
+stream = ExtResource("3_sword")
+bus = &"SFX"
+
+[node name="HitBox" type="Area2D" parent="." unique_id=6815591]
+position = Vector2(64, 27)
+scale = Vector2(2, 2)
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitBox" unique_id=316729727]
+shape = SubResource("RectangleShape2D_hitbox")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=473242870]
+enabled = false
+zoom = Vector2(0.5, 0.5)
+limit_left = 0
+limit_top = 0
+limit_right = 9440
+limit_bottom = 5920
+
+[node name="TakeDamage" type="AudioStreamPlayer2D" parent="." unique_id=1758830005]
+stream = ExtResource("4_damage")
+bus = &"SFX"
+
+[node name="DamageCoolDown" type="Timer" parent="." unique_id=856031467]
+wait_time = 0.5
+one_shot = true
 
 [node name="InteractionArea" type="Area2D" parent="."]
 collision_layer = 0
@@ -458,5 +491,9 @@ theme_override_font_sizes/font_size = 20
 theme_override_colors/font_color = Color(1, 0.9, 0.5, 1)
 theme_override_colors/font_outline_color = Color(0.12, 0.08, 0.05, 1)
 theme_override_constants/outline_size = 4
-text = "[E] Talk"
+text = "Friend"
 horizontal_alignment = 1
+
+[connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
+[connection signal="body_entered" from="HitBox" to="." method="_on_hit_box_body_entered"]
+[connection signal="body_entered" from="InteractionArea" to="." method="_on_interaction_area_body_entered"]

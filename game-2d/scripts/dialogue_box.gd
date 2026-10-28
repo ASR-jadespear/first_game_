@@ -94,11 +94,12 @@ func _show_line(idx: int) -> void:
 	speaker_label.text = line.get("speaker", "???")
 
 	# Update Portrait
+	var speaker_name: String = str(line.get("speaker", "")).to_lower()
 	var portrait_key: String = str(line.get("portrait", "")).to_lower()
-	if portrait_key == "player" or portrait_key == "player1" or portrait_key == "hero":
+	if portrait_key in ["player", "player1", "hero", "the boy", "p1"] or speaker_name in ["the boy", "hero", "player 1", "p1"]:
 		portrait_texture.texture = atlas_player1
 		portrait_texture.visible = true
-	elif portrait_key == "player2" or portrait_key == "npc" or portrait_key == "wanderer":
+	elif portrait_key in ["player2", "npc", "wanderer", "####", "p2"] or speaker_name in ["####", "player 2", "p2", "wanderer"]:
 		portrait_texture.texture = atlas_player2
 		portrait_texture.visible = true
 	else:
@@ -110,7 +111,6 @@ func _show_line(idx: int) -> void:
 
 	# Hide next indicator while typing
 	next_button.visible = false
-	next_hint_label.visible = false
 	if bounce_tween and bounce_tween.is_valid():
 		bounce_tween.kill()
 
@@ -142,7 +142,6 @@ func _on_typing_finished() -> void:
 	is_typing = false
 	dialogue_label.visible_ratio = 1.0
 	next_button.visible = true
-	next_hint_label.visible = true
 	_start_next_bounce()
 
 func _start_next_bounce() -> void:

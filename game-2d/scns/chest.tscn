@@ -1,0 +1,106 @@
+[gd_scene format=3 uid="uid://bstkptj0r7b3s"]
+
+[ext_resource type="Script" uid="uid://cxtmrvyodhm7q" path="res://scripts/chest.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://bf6xkwbgg0l5p" path="res://assets/images/objects/chest.png" id="2_rj4se"]
+[ext_resource type="AudioStream" uid="uid://dlwg5kpqe1jel" path="res://assets/audio/health_pickup.wav" id="3_sound"]
+[ext_resource type="FontFile" uid="uid://bhmdkp531fd3f" path="res://assets/images/font/NormalFont.ttf" id="4_font"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q5h7j"]
+atlas = ExtResource("2_rj4se")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_txgjt"]
+atlas = ExtResource("2_rj4se")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y6yix"]
+atlas = ExtResource("2_rj4se")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qxeb6"]
+atlas = ExtResource("2_rj4se")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_nkpwk"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q5h7j")
+}],
+"loop": 0,
+"name": &"closed",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_txgjt")
+}],
+"loop": 0,
+"name": &"open",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q5h7j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y6yix")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qxeb6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_txgjt")
+}],
+"loop": 0,
+"name": &"open_chest",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_solid"]
+size = Vector2(96, 60)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_detect"]
+radius = 160.0
+
+[node name="chest" type="StaticBody2D" unique_id=979278786]
+collision_layer = 3
+collision_mask = 0
+script = ExtResource("1_script")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1443320097]
+scale = Vector2(8, 8)
+sprite_frames = SubResource("SpriteFrames_nkpwk")
+animation = &"open_chest"
+autoplay = "closed"
+frame = 3
+frame_progress = 1.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1849201948]
+position = Vector2(0, 14)
+shape = SubResource("RectangleShape2D_solid")
+
+[node name="InteractionArea" type="Area2D" parent="." unique_id=1395847291]
+collision_layer = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea" unique_id=837492018]
+shape = SubResource("CircleShape2D_detect")
+
+[node name="PromptLabel" type="Label" parent="." unique_id=1947294821]
+offset_left = -100.0
+offset_top = -120.0
+offset_right = 100.0
+offset_bottom = -57.0
+theme_override_colors/font_color = Color(1, 0.9, 0.5, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.08, 0.05, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 40
+text = "[E] Open"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OpenSound" type="AudioStreamPlayer2D" parent="." unique_id=1029384756]
+stream = ExtResource("3_sound")
+pitch_scale = 0.85
+bus = &"SFX"

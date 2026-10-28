@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://c5pau5emenu01"]
 
 [ext_resource type="Script" uid="uid://b1pg0rn8dmcmh" path="res://scripts/pause_menu.gd" id="1_pause"]
-[ext_resource type="FontFile" uid="uid://bav0mfec8w51p" path="res://assets/images/font/NormalFont.ttf" id="2_font"]
-[ext_resource type="Texture2D" path="res://assets/images/UI/slider_progress_hover.png" id="3_panel"]
+[ext_resource type="FontFile" uid="uid://bhmdkp531fd3f" path="res://assets/images/font/NormalFont.ttf" id="2_font"]
+[ext_resource type="Texture2D" uid="uid://df2uuv82gf2p" path="res://assets/images/UI/slider_progress_hover.png" id="3_panel"]
 [ext_resource type="Texture2D" uid="uid://4a3kn7280h0o" path="res://assets/images/UI/button_normal.png" id="4_btn_norm"]
 [ext_resource type="Texture2D" uid="uid://b26qdo810vu6m" path="res://assets/images/UI/button_hover.png" id="5_btn_hov"]
 [ext_resource type="Texture2D" uid="uid://bfuo3s7hp0clv" path="res://assets/images/UI/button_pressed.png" id="6_btn_press"]
@@ -25,24 +25,24 @@ axis_stretch_vertical = 1
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_norm"]
 texture = ExtResource("4_btn_norm")
-texture_margin_left = 3.0
-texture_margin_top = 3.0
-texture_margin_right = 3.0
-texture_margin_bottom = 3.0
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_press"]
 texture = ExtResource("6_btn_press")
-texture_margin_left = 3.0
-texture_margin_top = 3.0
-texture_margin_right = 3.0
-texture_margin_bottom = 3.0
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_hov"]
 texture = ExtResource("5_btn_hov")
-texture_margin_left = 3.0
-texture_margin_top = 3.0
-texture_margin_right = 3.0
-texture_margin_bottom = 3.0
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_focus"]
 texture = ExtResource("8_focus")
@@ -112,7 +112,7 @@ theme_override_constants/separation = 14
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 67
 text = "PAUSED"
 horizontal_alignment = 1
 
@@ -128,7 +128,7 @@ theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
 theme_override_colors/font_pressed_color = Color(0.2, 0.15, 0.1, 1)
 theme_override_colors/font_hover_color = Color(0.05, 0.05, 0.05, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 40
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_norm")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_press")
 theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hov")
@@ -144,7 +144,7 @@ theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
 theme_override_colors/font_pressed_color = Color(0.2, 0.15, 0.1, 1)
 theme_override_colors/font_hover_color = Color(0.05, 0.05, 0.05, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 40
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_norm")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_press")
 theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hov")
@@ -166,7 +166,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.15, 0.12, 0.1, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 25
 text = "Master Volume"
 
 [node name="MasterValLabel" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/MasterBox/HBox" unique_id=162324147]
@@ -174,7 +174,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.25, 0.2, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 25
 text = "100%"
 
 [node name="MasterSlider" type="HSlider" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/MasterBox" unique_id=306316189]
@@ -201,7 +201,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.15, 0.12, 0.1, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 25
 text = "Music Volume"
 
 [node name="MusicValLabel" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/MusicBox/HBox" unique_id=1874375905]
@@ -209,7 +209,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.25, 0.2, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 25
 text = "100%"
 
 [node name="MusicSlider" type="HSlider" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/MusicBox" unique_id=1840313261]
@@ -236,7 +236,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.15, 0.12, 0.1, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 25
 text = "SFX Volume"
 
 [node name="SfxValLabel" type="Label" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SfxBox/HBox" unique_id=726965338]
@@ -244,7 +244,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.25, 0.2, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 25
 text = "100%"
 
 [node name="SfxSlider" type="HSlider" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SfxBox" unique_id=657613127]
@@ -267,7 +267,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.15, 0.12, 0.1, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 25
 text = "Fullscreen"
 
 [node name="FullscreenChk" type="CheckBox" parent="Root/CenterContainer/PanelContainer/MarginContainer/VBoxContainer/FullscreenBox" unique_id=1277203149]
@@ -288,7 +288,7 @@ theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
 theme_override_colors/font_pressed_color = Color(0.2, 0.15, 0.1, 1)
 theme_override_colors/font_hover_color = Color(0.05, 0.05, 0.05, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 40
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_norm")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_press")
 theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hov")
