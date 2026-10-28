@@ -29,6 +29,8 @@ var in_cutscene: bool = false
 var is_immortal: bool = false
 var can_unleash_power: bool = false
 var _invincible_tween: Tween = null
+var _stuck_timer: float = 0.0
+var _last_stuck_pos: Vector2 = Vector2.ZERO
 
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
 @onready var take_damage_sound: AudioStreamPlayer2D = get_node_or_null("TakeDamage")
@@ -51,6 +53,7 @@ func _ready() -> void:
 			hit_box.area_entered.connect(_on_hit_box_area_entered)
 
 	add_to_group("player")
+	call_deferred("_setup_player_collision_exceptions")
 
 	if has_node("/root/DialogueManager"):
 		DialogueManager.dialogue_started.connect(func(): can_move = false)
@@ -74,6 +77,7 @@ func set_as_leader() -> void:
 	follow_target = null
 	can_move = true
 	_apply_control_mode()
+	_setup_player_collision_exceptions()
 
 
 func set_as_follower(leader: Node2D) -> void:
@@ -81,6 +85,14 @@ func set_as_follower(leader: Node2D) -> void:
 	follow_target = leader
 	can_move = true
 	_apply_control_mode()
+	_setup_player_collision_exceptions()
+
+
+func _setup_player_collision_exceptions() -> void:
+	for p in get_tree().get_nodes_in_group("player"):
+		if is_instance_valid(p) and p != self and p is CollisionObject2D:
+			add_collision_exception_with(p)
+			p.add_collision_exception_with(self)
 
 
 func set_as_waiting() -> void:
@@ -137,7 +149,7 @@ func _physics_process(_delta: float) -> void:
 		ControlMode.LEADER:
 			_process_leader()
 		ControlMode.FOLLOWER:
-			_process_follower()
+			_process_follower(_delta)
 		ControlMode.WAITING:
 			velocity = Vector2.ZERO
 			play_animation("idle", last_direction)
@@ -156,7 +168,7 @@ func _process_leader() -> void:
 	process_animation()
 
 
-func _process_follower() -> void:
+func _process_follower(delta: float) -> void:
 	if not is_instance_valid(follow_target):
 		velocity = Vector2.ZERO
 		play_animation("idle", last_direction)
@@ -174,9 +186,25 @@ func _process_follower() -> void:
 		var dir = to_target.normalized()
 		global_position = follow_target.global_position - dir * 130.0
 		velocity = Vector2.ZERO
+		_stuck_timer = 0.0
+		_last_stuck_pos = global_position
 		return
 
 	if dist > STOP_DIST:
+		# If trying to move but blocked by an obstacle/wall for > 1.2s, catch up
+		if global_position.distance_squared_to(_last_stuck_pos) < 25.0:
+			_stuck_timer += delta
+			if _stuck_timer > 1.2:
+				_stuck_timer = 0.0
+				var dir = to_target.normalized()
+				global_position = follow_target.global_position - dir * 130.0
+				velocity = Vector2.ZERO
+				_last_stuck_pos = global_position
+				return
+		else:
+			_stuck_timer = 0.0
+			_last_stuck_pos = global_position
+
 		var dir = to_target.normalized()
 		var move_speed = SPEED * 0.95
 		if dist > SPRINT_DIST:
@@ -188,6 +216,8 @@ func _process_follower() -> void:
 		move_and_slide()
 		play_animation("run", last_direction)
 	else:
+		_stuck_timer = 0.0
+		_last_stuck_pos = global_position
 		velocity = Vector2.ZERO
 		play_animation("idle", last_direction)
 
@@ -319,9 +349,14 @@ func trigger_handover(arriving_player: Node2D) -> void:
 
 
 func heal(amount: int) -> void:
-	PlayerStats.health = min(PlayerStats.max_health, PlayerStats.health + amount)
-	health = PlayerStats.health
+	var new_health = PlayerStats.apply_heal(amount)
+	health = new_health
 	health_changed.emit(health)
+	for p in get_tree().get_nodes_in_group("player"):
+		if is_instance_valid(p) and p != self:
+			p.health = new_health
+			if p.has_signal("health_changed"):
+				p.health_changed.emit(new_health)
 
 
 func activate_full_power(duration: float = 5.0) -> void:
@@ -369,12 +404,21 @@ func take_damage(amount: int) -> void:
 
 		_shake_camera(8.0, 0.2)
 
-		PlayerStats.health = max(0, PlayerStats.health - amount)
-		health = PlayerStats.health
+		var new_health = PlayerStats.apply_damage(amount)
+		health = new_health
 		health_changed.emit(health)
+
+		for p in get_tree().get_nodes_in_group("player"):
+			if is_instance_valid(p) and p != self:
+				p.health = new_health
+				if p.has_signal("health_changed"):
+					p.health_changed.emit(new_health)
 
 		if health <= 0:
 			die()
+			for p in get_tree().get_nodes_in_group("player"):
+				if is_instance_valid(p) and p != self and p.get("alive") != false:
+					p.die()
 		elif damage_cool_down:
 			damage_cool_down.start()
 

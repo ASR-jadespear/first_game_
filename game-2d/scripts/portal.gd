@@ -27,12 +27,12 @@ func _on_body_entered(body: Node2D) -> void:
 			DialogueManager.start_dialogue([
 				{
 					"speaker": "The Boy",
-					"portrait": "The Boy",
+					"portrait": "08",
 					"text": "Looks like this portal is fake, we can’t go through it…. Damn you developers"
 				},
 				{
 					"speaker": "####",
-					"portrait": "####",
+					"portrait": "21",
 					"text": "Calm down’, we'll find the real one, we just have to keep going."
 				}
 			])

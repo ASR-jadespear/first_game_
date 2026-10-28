@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dsyqs5susco8l"
-path="res://.godot/imported/21.png-67e380d0824cc76a7bd77057a7f95b8b.ctex"
+uid="uid://bc14acva6mcxo"
+path="res://.godot/imported/10.png-5db3a41e463d8aa54f5cdfd9e72bef0d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/images/portrait/Hero/21.png"
-dest_files=["res://.godot/imported/21.png-67e380d0824cc76a7bd77057a7f95b8b.ctex"]
+source_file="res://assets/images/portrait/the boy/10.png"
+dest_files=["res://.godot/imported/10.png-5db3a41e463d8aa54f5cdfd9e72bef0d.ctex"]
 
 [params]
 

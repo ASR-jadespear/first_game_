@@ -21,6 +21,8 @@ var level2_intro_dialogue_shown: bool = false
 var level2_one_heart_unleash_prompt_shown: bool = false
 var is_ending_cutscene_running: bool = false
 var flower_pot_dialogue_shown: bool = false
+var _exit_warning_active: bool = false
+var _is_dying: bool = false
 
 
 func _ready() -> void:
@@ -34,9 +36,11 @@ func _ready() -> void:
 
 func _on_restart_level() -> void:
 	PlayerStats.reset()
+	_is_dying = false
 	level_two_hearts_dialogue_shown = false
 	level_one_heart_dialogue_shown = false
 	flower_pot_dialogue_shown = false
+	_exit_warning_active = false
 	if level == 1:
 		level1_first_slime_dialogue_shown = false
 		level1_all_defeated_dialogue_shown = false
@@ -47,11 +51,13 @@ func _on_restart_level() -> void:
 
 func _on_restart_game() -> void:
 	PlayerStats.reset()
+	_is_dying = false
 	level1_intro_played = false
 	first_enemy_prompt_shown = false
 	level1_first_slime_dialogue_shown = false
 	level1_all_defeated_dialogue_shown = false
 	flower_pot_dialogue_shown = false
+	_exit_warning_active = false
 	level_two_hearts_dialogue_shown = false
 	level_one_heart_dialogue_shown = false
 	first_chest_opened_in_game = false
@@ -91,7 +97,7 @@ func _show_combat_tutorial_dialogue() -> void:
 	DialogueManager.start_dialogue([
 		{
 			"speaker": "####",
-			"portrait": "####",
+			"portrait": "30",
 			"text": "Press SPACE to attack enemies, we can proceed to the next dimension once we cleared all enemies here"
 		}
 	])
@@ -106,6 +112,7 @@ func _load_level(level_number: int) -> void:
 	level_two_hearts_dialogue_shown = false
 	level_one_heart_dialogue_shown = false
 	flower_pot_dialogue_shown = false
+	_exit_warning_active = false
 	if level_number == 1:
 		level1_first_slime_dialogue_shown = false
 		level1_all_defeated_dialogue_shown = false
@@ -131,13 +138,19 @@ func _setup_level(level_root: Node) -> void:
 	player2 = level_root.get_node_or_null("Player2")
 
 	if player1:
+		hud.register_player(player1)
 		if not player1.health_changed.is_connected(_on_player_health_changed):
 			player1.health_changed.connect(_on_player_health_changed)
 		if not player1.power_unleashed.is_connected(_on_p1_power_unleashed):
 			player1.power_unleashed.connect(_on_p1_power_unleashed)
 	if player2:
+		hud.register_player(player2)
 		if not player2.health_changed.is_connected(_on_player_health_changed):
 			player2.health_changed.connect(_on_player_health_changed)
+
+	if player1 and player2:
+		player1.add_collision_exception_with(player2)
+		player2.add_collision_exception_with(player1)
 
 	# Connect and configure chests
 	var chests = current_level_root.find_children("*Chest*", "StaticBody2D", true, false)
@@ -169,7 +182,7 @@ func _setup_level(level_root: Node) -> void:
 			if not player2.died.is_connected(_on_player_died):
 				player2.died.connect(_on_player_died)
 
-		hud.show_over_notice("Level 2: Controls back to Player 1!", "Protect Player 2 and clear the dungeon!")
+		hud.show_message("Level 2: Controls given to Player 1!", "Protect Player 2 and clear the dungeon!")
 		if not level2_intro_dialogue_shown:
 			_start_level2_intro()
 
@@ -196,8 +209,8 @@ func _setup_level(level_root: Node) -> void:
 			portal.set_deferred("monitoring", false)
 			portal.set_deferred("monitorable", false)
 		if exit:
-			exit.set_deferred("monitoring", false)
-			exit.set_deferred("monitorable", false)
+			exit.set_deferred("monitoring", true)
+			exit.set_deferred("monitorable", true)
 	else:
 		if portal:
 			portal.visible = true
@@ -232,6 +245,8 @@ func _setup_level1_gameplay_immediate() -> void:
 			player2.camera_2d.make_current()
 
 	if player1 and player2:
+		player1.add_collision_exception_with(player2)
+		player2.add_collision_exception_with(player1)
 		player1.set_as_follower(player2)
 
 
@@ -266,7 +281,7 @@ func _start_level1_cutscene() -> void:
 	DialogueManager.start_dialogue([
 		{
 			"speaker": "The Boy",
-			"portrait": "The Boy",
+			"portrait": "00",
 			"text": "Huh…? Where am I…? What's with this sunny flowery place? I am pretty sure I slept in my bed last night after watching that show"
 		}
 	])
@@ -280,7 +295,7 @@ func _start_level1_cutscene() -> void:
 	DialogueManager.start_dialogue([
 		{
 			"speaker": "The Boy",
-			"portrait": "The Boy",
+			"portrait": "01",
 			"text": "Wait what…? Is that a slime? Oh no….Its charging right at me… !!"
 		}
 	])
@@ -293,27 +308,27 @@ func _start_level1_cutscene() -> void:
 	DialogueManager.start_dialogue([
 		{
 			"speaker": "####",
-			"portrait": "####",
+			"portrait": "00",
 			"text": "Hey, buddy, whatsup."
 		},
 		{
 			"speaker": "The Boy",
-			"portrait": "The Boy",
+			"portrait": "02",
 			"text": "What the!!!! Who are you … Wait!! You are #### from “The Courageous”. I was watching your final episode last night."
 		},
 		{
 			"speaker": "####",
-			"portrait": "####",
+			"portrait": "00",
 			"text": "Did you like it?"
 		},
 		{
 			"speaker": "The Boy",
-			"portrait": "The Boy",
+			"portrait": "04",
 			"text": "It was Amazing!!!!"
 		},
 		{
 			"speaker": "####",
-			"portrait": "####",
+			"portrait": "10",
 			"text": "Gracius. Well…I must say.. quite a bizarre imagination you’ve got there.And here I thought you were a horror-and-gore kinda boy."
 		}
 	])
@@ -326,47 +341,47 @@ func _start_level1_cutscene() -> void:
 	DialogueManager.start_dialogue([
 		{
 			"speaker": "The Boy",
-			"portrait": "The Boy",
+			"portrait": "05",
 			"text": "I have no idea what you’re saying buddy."
 		},
 		{
 			"speaker": "####",
-			"portrait": "####",
+			"portrait": "20",
 			"text": "You tell me… you created this place, this \"sunny flowery field\"-- this is ur imagination.."
 		},
 		{
 			"speaker": "The Boy",
-			"portrait": "The Boy",
+			"portrait": "06",
 			"text": "What do we mean by MY imagination? and if it really is mine then how come you are here, ####"
 		},
 		{
 			"speaker": "####",
-			"portrait": "####",
+			"portrait": "11",
 			"text": "what do u think? YOU brought me here."
 		},
 		{
 			"speaker": "The Boy",
-			"portrait": "The Boy",
+			"portrait": "03",
 			"text": "Me?? Ho ... .w did i…? Look, I know nothing, I swear.."
 		},
 		{
 			"speaker": "####",
-			"portrait": "####",
+			"portrait": "01",
 			"text": "Enough talking… if you want answers then you gotta play along with me, Purge this land from evil and only then can you be free from this lucid dream"
 		},
 		{
 			"speaker": "The Boy",
-			"portrait": "The Boy",
+			"portrait": "03",
 			"text": "Fight..I cant fight"
 		},
 		{
 			"speaker": "####",
-			"portrait": "####",
+			"portrait": "30",
 			"text": "Dont you remember.. I am the hero from “The Courageous” , and you my biggest fan, ….the hell you can do this. Just follow my lead and you’ll be back home in no time."
 		},
 		{
 			"speaker": "The Boy",
-			"portrait": "The Boy",
+			"portrait": "10",
 			"text": "(nervous chuckles)"
 		}
 	])
@@ -395,6 +410,8 @@ func _start_level1_cutscene() -> void:
 		hud.set_player(player2)
 
 	if player1 and player2:
+		player1.add_collision_exception_with(player2)
+		player2.add_collision_exception_with(player1)
 		player1.set_as_follower(player2)
 
 
@@ -575,7 +592,7 @@ func _update_enemies_cleared_status() -> void:
 			DialogueManager.start_dialogue([
 				{
 					"speaker": "####",
-					"portrait": "####",
+					"portrait": "01",
 					"text": "One down 3 more to go"
 				}
 			])
@@ -594,13 +611,18 @@ func _trigger_level1_victory_dialogue() -> void:
 	DialogueManager.start_dialogue([
 		{
 			"speaker": "The Boy",
-			"portrait": "The Boy",
+			"portrait": "07",
 			"text": "Yay.... we did it. All enemies down, that means the portal should be open, right?"
 		},
 		{
 			"speaker": "####",
-			"portrait": "####",
-			"text": "Hell yeah"
+			"portrait": "30",
+			"text": "Hell yeah. Now brace yourself for the next Round"
+		},
+		{
+			"speaker":"The Boy",
+			"potrait":"02",
+			"text":"Wa..it!!! There's moreeeee....."
 		}
 	])
 	await DialogueManager.dialogue_ended
@@ -648,17 +670,17 @@ func _on_chest_opened(chest: Node2D) -> void:
 			DialogueManager.start_dialogue([
 				{
 					"speaker": "The Boy",
-					"portrait": "The Boy",
+					"portrait": "03",
 					"text": "Jackpot! Wait... it’s just a handwritten note."
 				},
 				{
 					"speaker": "####",
-					"portrait": "####",
+					"portrait": "11",
 					"text": "What’s it say?"
 				},
 				{
 					"speaker": "The Boy",
-					"portrait": "The Boy",
+					"portrait": "03",
 					"text": "'Congrats on finding this. Now please stop trying to break the collision and test the actual quest.'"
 				}
 			])
@@ -669,13 +691,18 @@ func _on_chest_opened(chest: Node2D) -> void:
 		DialogueManager.start_dialogue([
 			{
 				"speaker": "The Boy",
-				"portrait": "The Boy",
+				"portrait": "04",
 				"text": "Ooh, jackpot! Who leaves a whole treasure chest out here?"
 			},
 			{
 				"speaker": "####",
-				"portrait": "####",
+				"portrait": "10",
 				"text": "Your Imagination, clearly. Rewarding you for wandering into dead ends like you knew what you were doing."
+			},
+			{
+				"speaker":"The Boy",
+				"potrait":"06",
+				"text": "Ughhhh"
 			}
 		])
 
@@ -691,23 +718,23 @@ func _start_level2_intro() -> void:
 	DialogueManager.start_dialogue([
 		{
 			"speaker": "####",
-			"portrait": "####",
-			"text": "now its your turn to shine, FOLLOW MY MOVEMENTS and show those slimes what you've got"
+			"portrait": "30",
+			"text": "now its your turn to shine, FOLLOW MY MOVES and show those slimes what you've got"
 		},
 		{
 			"speaker": "The Boy",
-			"portrait": "The Boy",
+			"portrait": "08",
 			"text": "are you saying that I cant defeat the ninjas?"
 		},
 		{
 			"speaker": "####",
-			"portrait": "####",
+			"portrait": "01",
 			"text": "No... you can't, you were sweating your shits out a while ago... "
 		},
 		
 		{
 			"speaker": "The Boy",
-			"portrait": "The Boy",
+			"portrait": "01",
 			"text": "Ugghhhh "
 		}
 	])
@@ -721,7 +748,21 @@ func _start_level2_intro() -> void:
 func _on_exit_body_entered(body: Node2D) -> void:
 	if (body.name.begins_with("Player") or body.is_in_group("player")) and not _is_transitioning:
 		if not _are_all_enemies_defeated():
+			if not (has_node("/root/DialogueManager") and DialogueManager.is_active) and not _exit_warning_active:
+				_exit_warning_active = true
+				hud.show_message("Defeat All enemies to move on to the next Level", 3.0)
+				DialogueManager.start_dialogue([
+					{
+						"speaker": "####",
+						"portrait": "01",
+						"text": "Lets Go!! We need to go back and kill 'em all"
+					}
+				])
+				await DialogueManager.dialogue_ended
+				await get_tree().create_timer(1.5).timeout
+				_exit_warning_active = false
 			return
+
 		_is_transitioning = true
 		if level >= 2:
 			_run_ending_cutscene()
@@ -764,52 +805,52 @@ func _run_ending_cutscene() -> void:
 	DialogueManager.start_dialogue([
 	{
 		"speaker": "The Boy",
-		"portrait": "The Boy",
+		"portrait": "07",
 		"text": "The final portal... We can finally go home. Sorry for dragging you into this."
 	},
 	{
 		"speaker": "####",
-		"portrait": "####",
+		"portrait": "41",
 		"text": "Don't sweat it."
 	},
 	{
 		"speaker": "The Boy",
-		"portrait": "The Boy",
+		"portrait": "07",
 		"text": "Ready?"
 	},
 	{
 		"speaker": "####",
-		"portrait": "####",
+		"portrait": "21",
 		"text": "I can't come with you."
 	},
 	{
 		"speaker": "The Boy",
-		"portrait": "The Boy",
+		"portrait": "02",
 		"text": "What?! Why not?"
 	},
 	{
 		"speaker": "####",
-		"portrait": "####",
+		"portrait": "40",
 		"text": "Haven't you realized? I'm not real. Just like this place, I only exist in your head."
 	},
 	{
 		"speaker": "The Boy",
-		"portrait": "The Boy",
+		"portrait": "00",
 		"text": "B-but... I see you every night before I sleep. You fight off the monsters!"
 	},
 	{
 		"speaker": "####",
-		"portrait": "####",
+		"portrait": "21",
 		"text": "You imagined me whenever you were scared. Every battle we fought? That was all you. You're your own hero."
 	},
 	{
 		"speaker": "The Boy",
-		"portrait": "The Boy",
+		"portrait": "03",
 		"text": "I... I don't know what to say. Having you around made me feel safe."
 	},
 	{
 		"speaker": "####",
-		"portrait": "####",
+		"portrait": "21",
 		"text": "Portal's closing, kid. Time to wake up. Go."
 	}
 ])
@@ -836,6 +877,9 @@ func _run_ending_cutscene() -> void:
 
 
 func _on_player_died() -> void:
+	if _is_dying:
+		return
+	_is_dying = true
 	var death_messages = [
 		"Skill issues detected",
 		"You can do better you know",
@@ -849,9 +893,11 @@ func _on_player_died() -> void:
 	level_two_hearts_dialogue_shown = false
 	level_one_heart_dialogue_shown = false
 	flower_pot_dialogue_shown = false
+	_exit_warning_active = false
 	if level == 2:
 		level2_one_heart_unleash_prompt_shown = false
 	_load_level(level)
+	_is_dying = false
 	await hud.fade(0.0)
 
 
@@ -882,7 +928,7 @@ func _on_player_health_changed(new_health: int) -> void:
 		DialogueManager.start_dialogue([
 			{
 				"speaker": follower_speaker,
-				"portrait": follower_speaker,
+				"portrait": "01",
 				"text": "Watch out, you are on your last life"
 			}
 		])
@@ -892,7 +938,7 @@ func _on_player_health_changed(new_health: int) -> void:
 		DialogueManager.start_dialogue([
 			{
 				"speaker": follower_speaker,
-				"portrait": follower_speaker,
+				"portrait": "03" if follower_speaker == "The Boy" else "20",
 				"text": "You dont look so good"
 			}
 		])
@@ -902,12 +948,12 @@ func _start_level2_unleash_prompt_dialogue() -> void:
 	DialogueManager.start_dialogue([
 		{
 			"speaker": "The Boy",
-			"portrait": "The Boy",
+			"portrait": "01",
 			"text": "Ummm, i cant hold back this horrendous monster..i need help"
 		},
 		{
 			"speaker": "####",
-			"portrait": "####",
+			"portrait": "01",
 			"text": "Press E to unleash ur full power,"
 		}
 	])
@@ -921,7 +967,7 @@ func _on_p1_power_unleashed() -> void:
 	DialogueManager.start_dialogue([
 		{
 			"speaker": "####",
-			"portrait": "####",
+			"portrait": "01",
 			"text": "Now you are invincible for 5 sec, quickly…. kill this goddamn enemy"
 		}
 	])
@@ -971,7 +1017,7 @@ func _on_flower_pot_body_entered(body: Node2D) -> void:
 	DialogueManager.start_dialogue([
 		{
 			"speaker": "####",
-			"portrait": "####",
+			"portrait": "11",
 			"text": "Shush!!! The Big Dude is near. Follow Me!!!"
 		}
 	])

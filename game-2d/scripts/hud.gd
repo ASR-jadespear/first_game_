@@ -17,6 +17,13 @@ const HEART_EMPTY = preload("res://assets/images/UI/empty_heart.png")
 var _message_tween: Tween = null
 var _handover_tween: Tween = null
 
+func _ready() -> void:
+	if has_node("/root/PlayerStats"):
+		var stats = get_node("/root/PlayerStats")
+		if stats.has_signal("health_changed") and not stats.health_changed.is_connected(_update_health):
+			stats.health_changed.connect(_update_health)
+		_update_health(stats.health)
+
 func show_handover_notice(title_text: String = "Give the controls to your friend!", subtitle_text: String = "Player 2 is now in control!") -> void:
 	if not handover_notice:
 		show_message(title_text + " - " + subtitle_text, 4.0)
@@ -67,10 +74,13 @@ func show_message(text: String, duration: float = 2.5) -> void:
 
 func set_player(p) -> void:
 	player = p
-	if player:
-		if not player.health_changed.is_connected(_update_health):
-			player.health_changed.connect(_update_health)
-		_update_health(player.health)
+	register_player(p)
+
+func register_player(p) -> void:
+	if p and p.has_signal("health_changed"):
+		if not p.health_changed.is_connected(_update_health):
+			p.health_changed.connect(_update_health)
+		_update_health(PlayerStats.health)
 		
 func _update_health(new_health: int) -> void:
 	var hearts = hearts_container.get_children()

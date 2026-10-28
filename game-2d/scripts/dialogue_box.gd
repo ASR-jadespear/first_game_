@@ -27,13 +27,14 @@ var base_next_y: float = 0.0
 
 var atlas_player1: AtlasTexture
 var atlas_player2: AtlasTexture
+var portrait_cache: Dictionary = {}
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = false
 	root_control.modulate.a = 0.0
 
-	# Setup atlas textures for 32x32 front idle portraits
+	# Setup atlas textures for 32x32 front idle portraits (fallback)
 	atlas_player1 = AtlasTexture.new()
 	atlas_player1.atlas = TEXTURE_PLAYER1
 	atlas_player1.region = Rect2(0, 0, 32, 32)
@@ -41,6 +42,11 @@ func _ready() -> void:
 	atlas_player2 = AtlasTexture.new()
 	atlas_player2.atlas = TEXTURE_PLAYER2
 	atlas_player2.region = Rect2(0, 0, 32, 32)
+
+	if portrait_texture:
+		portrait_texture.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+
+	_preload_portraits()
 
 	base_next_y = next_button.position.y
 	next_button.pressed.connect(_on_next_pressed)
@@ -94,13 +100,10 @@ func _show_line(idx: int) -> void:
 	speaker_label.text = line.get("speaker", "???")
 
 	# Update Portrait
-	var speaker_name: String = str(line.get("speaker", "")).to_lower()
-	var portrait_key: String = str(line.get("portrait", "")).to_lower()
-	if portrait_key in ["player", "player1", "hero", "the boy", "p1"] or speaker_name in ["the boy", "hero", "player 1", "p1"]:
-		portrait_texture.texture = atlas_player1
-		portrait_texture.visible = true
-	elif portrait_key in ["player2", "npc", "wanderer", "####", "p2"] or speaker_name in ["####", "player 2", "p2", "wanderer"]:
-		portrait_texture.texture = atlas_player2
+	var portrait_key = line.get("portrait", line.get("potrait", ""))
+	var tex = _resolve_portrait_texture(line.get("speaker", ""), str(portrait_key))
+	if tex:
+		portrait_texture.texture = tex
 		portrait_texture.visible = true
 	else:
 		portrait_texture.visible = false
@@ -187,3 +190,91 @@ func _close_dialogue() -> void:
 	await tween.finished
 	visible = false
 	dialogue_completed.emit()
+
+
+func _preload_portraits() -> void:
+	var folders = ["the boy", "####"]
+	for folder in folders:
+		var dir_path = "res://assets/images/portrait/%s" % folder
+		var dir = DirAccess.open(dir_path)
+		if dir:
+			dir.list_dir_begin()
+			var file_name = dir.get_next()
+			while file_name != "":
+				if not dir.current_is_dir() and file_name.ends_with(".png"):
+					var full_path = "%s/%s" % [dir_path, file_name]
+					_get_cached_texture(full_path)
+				file_name = dir.get_next()
+			dir.list_dir_end()
+
+
+func _get_cached_texture(path: String) -> Texture2D:
+	if portrait_cache.has(path):
+		return portrait_cache[path]
+	if ResourceLoader.exists(path):
+		var tex = load(path) as Texture2D
+		portrait_cache[path] = tex
+		return tex
+	return null
+
+
+func _resolve_portrait_texture(speaker_raw: String, portrait_raw: String) -> Texture2D:
+	var speaker = speaker_raw.strip_edges()
+	var port = portrait_raw.strip_edges()
+	var speaker_lower = speaker.to_lower()
+	var port_lower = port.to_lower()
+
+	# 1. Direct resource path
+	if port.begins_with("res://"):
+		return _get_cached_texture(port)
+
+	# 2. Determine character folder
+	var character_folder = ""
+	if port_lower.begins_with("the boy/") or port_lower.begins_with("the boy\\"):
+		character_folder = "the boy"
+		port = port.substr(8)
+	elif port_lower.begins_with("####/") or port_lower.begins_with("####\\"):
+		character_folder = "####"
+		port = port.substr(5)
+	elif speaker_lower in ["the boy", "p1", "player1", "player 1", "boy"]:
+		character_folder = "the boy"
+	elif speaker_lower in ["####", "p2", "player2", "player 2", "hero", "the wanderer", "wanderer"]:
+		character_folder = "####"
+	elif port_lower in ["the boy", "p1", "player1", "player 1", "boy"]:
+		character_folder = "the boy"
+	elif port_lower in ["####", "p2", "player2", "player 2", "hero", "the wanderer", "wanderer"]:
+		character_folder = "####"
+
+	# 3. Determine filename
+	var file_name = port.strip_edges()
+	if file_name.is_empty() or file_name.to_lower() in ["the boy", "####", "player", "player1", "player2", "p1", "p2", "hero", "wanderer", "npc"]:
+		file_name = "00.png"
+	elif file_name.is_valid_int() and file_name.length() == 1:
+		file_name = "%02d.png" % file_name.to_int()
+	elif not file_name.ends_with(".png"):
+		file_name += ".png"
+
+	# 4. Try loading from portrait folder
+	if not character_folder.is_empty():
+		var path = "res://assets/images/portrait/%s/%s" % [character_folder, file_name]
+		var tex = _get_cached_texture(path)
+		if tex:
+			return tex
+		if character_folder == "####":
+			var alt_path = "res://assets/images/portrait/Hero/%s" % file_name
+			tex = _get_cached_texture(alt_path)
+			if tex:
+				return tex
+		# Fallback to 00.png if specific image not found
+		var fallback_path = "res://assets/images/portrait/%s/00.png" % character_folder
+		tex = _get_cached_texture(fallback_path)
+		if tex:
+			return tex
+
+	# 5. Legacy atlas fallback
+	if character_folder == "the boy":
+		return atlas_player1
+	elif character_folder == "####":
+		return atlas_player2
+
+	return null
