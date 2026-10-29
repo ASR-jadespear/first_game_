@@ -25,6 +25,7 @@ var _exit_warning_active: bool = false
 var _is_dying: bool = false
 var _previous_health: int = 100
 var _ending_bg_layer: CanvasLayer = null
+var _cutscene_token: int = 0
 
 
 func _ready() -> void:
@@ -58,6 +59,11 @@ func _on_start_game() -> void:
 
 
 func _on_restart_level() -> void:
+	_cutscene_token += 1
+	is_cutscene_running = false
+	is_ending_cutscene_running = false
+	if has_node("/root/DialogueManager"):
+		DialogueManager.stop_dialogue()
 	PlayerStats.reset()
 	_previous_health = PlayerStats.health
 	_is_dying = false
@@ -73,11 +79,15 @@ func _on_restart_level() -> void:
 	if is_instance_valid(_ending_bg_layer):
 		_ending_bg_layer.queue_free()
 		_ending_bg_layer = null
-	is_ending_cutscene_running = false
 	_load_level(level)
 
 
 func _on_restart_game() -> void:
+	_cutscene_token += 1
+	is_cutscene_running = false
+	is_ending_cutscene_running = false
+	if has_node("/root/DialogueManager"):
+		DialogueManager.stop_dialogue()
 	PlayerStats.reset()
 	_previous_health = PlayerStats.health
 	_is_dying = false
@@ -93,7 +103,6 @@ func _on_restart_game() -> void:
 	level2_chest2_dialogue_shown = false
 	level2_intro_dialogue_shown = false
 	level2_one_heart_unleash_prompt_shown = false
-	is_ending_cutscene_running = false
 	if is_instance_valid(_ending_bg_layer):
 		_ending_bg_layer.queue_free()
 		_ending_bg_layer = null
@@ -301,6 +310,7 @@ func _setup_level1_gameplay_immediate() -> void:
 
 
 func _start_level1_cutscene() -> void:
+	var token = _cutscene_token
 	is_cutscene_running = true
 
 	# P1 lands in level 1, P2 is not visible
@@ -324,7 +334,7 @@ func _start_level1_cutscene() -> void:
 			player2.died.connect(_on_player_died)
 
 	await get_tree().create_timer(0.6).timeout
-	if not is_instance_valid(player1):
+	if token != _cutscene_token or not is_instance_valid(player1):
 		return
 
 	# Segment 1 Part A: The Boy lands in the sunny flowery place
@@ -336,10 +346,16 @@ func _start_level1_cutscene() -> void:
 		}
 	])
 	await DialogueManager.dialogue_ended
+	if token != _cutscene_token:
+		return
 
 	# Slime appears right before the player says the approach line
 	var intro_slime = _spawn_cutscene_intro_slime()
 	await get_tree().create_timer(0.35).timeout
+	if token != _cutscene_token:
+		if is_instance_valid(intro_slime):
+			intro_slime.queue_free()
+		return
 
 	# Segment 1 Part B: Slime is approaching line
 	DialogueManager.start_dialogue([
@@ -350,9 +366,15 @@ func _start_level1_cutscene() -> void:
 		}
 	])
 	await DialogueManager.dialogue_ended
+	if token != _cutscene_token:
+		if is_instance_valid(intro_slime):
+			intro_slime.queue_free()
+		return
 
 	# Cutscene Action 1: Slime charges, P2 becomes visible, jumps in and smashes it!
-	await _run_cutscene_slime_charge_and_smash(intro_slime)
+	await _run_cutscene_slime_charge_and_smash(intro_slime, token)
+	if token != _cutscene_token:
+		return
 
 	# Segment 2: P2 meets The Boy
 	DialogueManager.start_dialogue([
@@ -383,9 +405,13 @@ func _start_level1_cutscene() -> void:
 		}
 	])
 	await DialogueManager.dialogue_ended
+	if token != _cutscene_token:
+		return
 
 	# Cutscene Action 2: Camera zooms out and shows the map within 2 sec, then returns to normal
-	await _run_cutscene_camera_map_view()
+	await _run_cutscene_camera_map_view(token)
+	if token != _cutscene_token:
+		return
 
 	# Segment 3: P2 reveals lucid dream, calls to adventure
 	DialogueManager.start_dialogue([
@@ -436,6 +462,8 @@ func _start_level1_cutscene() -> void:
 		}
 	])
 	await DialogueManager.dialogue_ended
+	if token != _cutscene_token:
+		return
 
 	# Cutscene complete!
 	level1_intro_played = true
@@ -498,7 +526,7 @@ func _spawn_cutscene_intro_slime() -> Node2D:
 	return intro_slime
 
 
-func _run_cutscene_slime_charge_and_smash(intro_slime: Node2D) -> void:
+func _run_cutscene_slime_charge_and_smash(intro_slime: Node2D, token: int = -1) -> void:
 	if not is_instance_valid(player1) or not is_instance_valid(player2) or not is_instance_valid(intro_slime):
 		return
 
@@ -511,6 +539,10 @@ func _run_cutscene_slime_charge_and_smash(intro_slime: Node2D) -> void:
 	var charge_tween = create_tween()
 	charge_tween.tween_property(intro_slime, "global_position:x", player1.global_position.x + 190.0, 0.7)
 	await charge_tween.finished
+	if token != -1 and token != _cutscene_token:
+		if is_instance_valid(intro_slime):
+			intro_slime.queue_free()
+		return
 
 	# P2 becomes visible and jumps in from above
 	player2.visible = true
@@ -518,6 +550,10 @@ func _run_cutscene_slime_charge_and_smash(intro_slime: Node2D) -> void:
 	var jump_tween = create_tween()
 	jump_tween.tween_property(player2, "global_position", Vector2(player1.global_position.x + 120.0, player1.global_position.y), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	await jump_tween.finished
+	if token != -1 and token != _cutscene_token:
+		if is_instance_valid(intro_slime):
+			intro_slime.queue_free()
+		return
 
 	# P2 attacks right, swinging sword to smash the slime
 	player2.play_animation("attack", Vector2.RIGHT)
@@ -526,6 +562,10 @@ func _run_cutscene_slime_charge_and_smash(intro_slime: Node2D) -> void:
 		player2.swing_sword_sound.play()
 
 	await get_tree().create_timer(0.12).timeout
+	if token != -1 and token != _cutscene_token:
+		if is_instance_valid(intro_slime):
+			intro_slime.queue_free()
+		return
 
 	# Slime gets hit, flashes, plays damage sound, dies and fades out cleanly
 	if is_instance_valid(intro_slime):
@@ -544,14 +584,17 @@ func _run_cutscene_slime_charge_and_smash(intro_slime: Node2D) -> void:
 		fade.tween_callback(intro_slime.queue_free)
 
 	await get_tree().create_timer(0.45).timeout
+	if token != -1 and token != _cutscene_token:
+		return
 
 	# P2 turns to face P1, P1 faces P2
-	player2.play_animation("idle", Vector2.LEFT)
-	player1.play_animation("idle", Vector2.RIGHT)
-	player1.play_animation("idle", Vector2.RIGHT)
+	if is_instance_valid(player2):
+		player2.play_animation("idle", Vector2.LEFT)
+	if is_instance_valid(player1):
+		player1.play_animation("idle", Vector2.RIGHT)
 
 
-func _run_cutscene_camera_map_view() -> void:
+func _run_cutscene_camera_map_view(token: int = -1) -> void:
 	var cam: Camera2D = null
 	if is_instance_valid(player1) and player1.camera_2d:
 		cam = player1.camera_2d
@@ -569,14 +612,26 @@ func _run_cutscene_camera_map_view() -> void:
 	var zoom_out = create_tween().set_parallel(true)
 	zoom_out.tween_property(cam, "zoom", Vector2(0.2, 0.2), 0.65).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	await zoom_out.finished
+	if token != -1 and token != _cutscene_token:
+		if is_instance_valid(cam):
+			cam.zoom = Vector2(0.5, 0.5)
+		return
 
 	# Show the map for ~1.1s (around 2 sec total)
 	await get_tree().create_timer(1.1).timeout
+	if token != -1 and token != _cutscene_token:
+		if is_instance_valid(cam):
+			cam.zoom = Vector2(0.5, 0.5)
+		return
 
 	# Zoom back in smoothly over 0.65s to normal
 	var zoom_in = create_tween().set_parallel(true)
 	zoom_in.tween_property(cam, "zoom", Vector2(0.5, 0.5), 0.65).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	await zoom_in.finished
+	if token != -1 and token != _cutscene_token:
+		if is_instance_valid(cam):
+			cam.zoom = Vector2(0.5, 0.5)
+		return
 
 
 func _connect_enemies() -> void:
@@ -658,6 +713,7 @@ func _update_enemies_cleared_status() -> void:
 
 
 func _trigger_level1_victory_dialogue() -> void:
+	var token = _cutscene_token
 	DialogueManager.start_dialogue([
 		{
 			"speaker": "The Boy",
@@ -676,6 +732,8 @@ func _trigger_level1_victory_dialogue() -> void:
 		}
 	])
 	await DialogueManager.dialogue_ended
+	if token != _cutscene_token:
+		return
 	_unlock_exit_and_show_portal()
 
 
@@ -702,6 +760,11 @@ func _unlock_exit_and_show_portal() -> void:
 
 
 func _show_victory_screen() -> void:
+	_cutscene_token += 1
+	is_cutscene_running = false
+	is_ending_cutscene_running = false
+	if has_node("/root/DialogueManager"):
+		DialogueManager.stop_dialogue()
 	if has_node("VictoryScreen"):
 		$VictoryScreen.open()
 	else:
@@ -758,6 +821,7 @@ func _on_chest_opened(chest: Node2D) -> void:
 
 
 func _start_level2_intro() -> void:
+	var token = _cutscene_token
 	level2_intro_dialogue_shown = true
 	if player1:
 		player1.can_move = false
@@ -765,6 +829,8 @@ func _start_level2_intro() -> void:
 		player2.can_move = false
 
 	await get_tree().create_timer(0.4).timeout
+	if token != _cutscene_token:
+		return
 	DialogueManager.start_dialogue([
 		{
 			"speaker": "####",
@@ -789,6 +855,8 @@ func _start_level2_intro() -> void:
 		}
 	])
 	await DialogueManager.dialogue_ended
+	if token != _cutscene_token:
+		return
 	if player1 and not player1.in_cutscene:
 		player1.can_move = true
 	if player2 and not player2.in_cutscene:
@@ -799,6 +867,7 @@ func _on_exit_body_entered(body: Node2D) -> void:
 	if (body.name.begins_with("Player") or body.is_in_group("player")) and not _is_transitioning:
 		if not _are_all_enemies_defeated():
 			if not (has_node("/root/DialogueManager") and DialogueManager.is_active) and not _exit_warning_active:
+				var token = _cutscene_token
 				_exit_warning_active = true
 				hud.show_message("Defeat All enemies to move on to the next Level", 3.0)
 				DialogueManager.start_dialogue([
@@ -809,7 +878,13 @@ func _on_exit_body_entered(body: Node2D) -> void:
 					}
 				])
 				await DialogueManager.dialogue_ended
+				if token != _cutscene_token:
+					_exit_warning_active = false
+					return
 				await get_tree().create_timer(1.5).timeout
+				if token != _cutscene_token:
+					_exit_warning_active = false
+					return
 				_exit_warning_active = false
 			return
 
@@ -883,6 +958,7 @@ func _show_final_bg_screen() -> CanvasLayer:
 
 
 func _run_ending_cutscene() -> void:
+	var token = _cutscene_token
 	is_ending_cutscene_running = true
 
 	# Lock player inputs
@@ -896,7 +972,7 @@ func _run_ending_cutscene() -> void:
 		player2.velocity = Vector2.ZERO
 
 	# Position near the last portal
-	var portal = current_level_root.get_node_or_null("portal")
+	var portal = current_level_root.get_node_or_null("portal") if current_level_root else null
 	var target_portal_pos = portal.global_position if portal else (player1.global_position if player1 else Vector2.ZERO)
 
 	# Face each other near the portal
@@ -907,18 +983,32 @@ func _run_ending_cutscene() -> void:
 		prep_tween.tween_property(player1, "global_position", p1_pos, 0.4)
 		prep_tween.tween_property(player2, "global_position", p2_pos, 0.4)
 		await prep_tween.finished
+		if token != _cutscene_token:
+			return
 		player1.play_animation("idle", Vector2.LEFT)
 		player2.play_animation("idle", Vector2.RIGHT)
 
 	await get_tree().create_timer(0.3).timeout
+	if token != _cutscene_token:
+		return
 
 	# Show final background screen behind dialogue
 	var ending_bg = _show_final_bg_screen()
 	var fade_in = create_tween()
 	fade_in.tween_property(ending_bg.get_node("Root"), "modulate:a", 1.0, 0.4)
 	await fade_in.finished
+	if token != _cutscene_token:
+		if is_instance_valid(ending_bg):
+			ending_bg.queue_free()
+		_ending_bg_layer = null
+		return
 
 	await get_tree().create_timer(0.2).timeout
+	if token != _cutscene_token:
+		if is_instance_valid(ending_bg):
+			ending_bg.queue_free()
+		_ending_bg_layer = null
+		return
 
 	# The Game Ending Dialogues
 	DialogueManager.start_dialogue([
@@ -974,6 +1064,11 @@ func _run_ending_cutscene() -> void:
 	}
 ])
 	await DialogueManager.dialogue_ended
+	if token != _cutscene_token:
+		if is_instance_valid(ending_bg):
+			ending_bg.queue_free()
+		_ending_bg_layer = null
+		return
 
 	# Hide final background screen so the characters are shown at the portal
 	if is_instance_valid(ending_bg):
@@ -984,7 +1079,12 @@ func _run_ending_cutscene() -> void:
 			ending_bg.queue_free()
 		_ending_bg_layer = null
 
+	if token != _cutscene_token:
+		return
+
 	await get_tree().create_timer(0.3).timeout
+	if token != _cutscene_token:
+		return
 
 	# P1 walks into the portal and P2 disappears
 	if player1 and portal:
@@ -998,10 +1098,16 @@ func _run_ending_cutscene() -> void:
 		disappear_tween.tween_property(player2, "modulate:a", 0.0, 0.8)
 
 	await get_tree().create_timer(1.2).timeout
+	if token != _cutscene_token:
+		return
 
 	# Black screen shows epilogue
 	await hud.fade(1.0)
+	if token != _cutscene_token:
+		return
 	await hud.show_epilogue_message("You wake up in the real world, no more ninjas and slimes,  But you are not the same anymore", 4.0)
+	if token != _cutscene_token:
+		return
 
 	_show_victory_screen()
 
@@ -1010,15 +1116,30 @@ func _on_player_died() -> void:
 	if _is_dying:
 		return
 	_is_dying = true
+	_cutscene_token += 1
+	is_cutscene_running = false
+	is_ending_cutscene_running = false
+	if has_node("/root/DialogueManager"):
+		DialogueManager.stop_dialogue()
 	var death_messages = [
 		"Skill issues detected",
 		"You can do better you know",
 		"Dont go looking into random corners.... there is nothing interesting there.... probably"
 	]
 	var chosen_msg = death_messages.pick_random()
+	var token = _cutscene_token
 	await get_tree().create_timer(0.6).timeout
+	if token != _cutscene_token:
+		_is_dying = false
+		return
 	await hud.fade(1.0)
+	if token != _cutscene_token:
+		_is_dying = false
+		return
 	await hud.show_death_message(chosen_msg, 2.2)
+	if token != _cutscene_token:
+		_is_dying = false
+		return
 	PlayerStats.reset()
 	_previous_health = PlayerStats.health
 	level_two_hearts_dialogue_shown = false
@@ -1083,6 +1204,7 @@ func _on_player_health_changed(new_health: int) -> void:
 
 
 func _start_level2_unleash_prompt_dialogue() -> void:
+	var token = _cutscene_token
 	DialogueManager.start_dialogue([
 		{
 			"speaker": "The Boy",
@@ -1096,12 +1218,15 @@ func _start_level2_unleash_prompt_dialogue() -> void:
 		}
 	])
 	await DialogueManager.dialogue_ended
+	if token != _cutscene_token:
+		return
 	if is_instance_valid(player1):
 		player1.can_unleash_power = true
 	hud.show_message("Press E to unleash full power!", 4.0)
 
 
 func _on_p1_power_unleashed() -> void:
+	var token = _cutscene_token
 	DialogueManager.start_dialogue([
 		{
 			"speaker": "####",
@@ -1110,6 +1235,8 @@ func _on_p1_power_unleashed() -> void:
 		}
 	])
 	await DialogueManager.dialogue_ended
+	if token != _cutscene_token:
+		return
 	if is_instance_valid(player1):
 		player1.activate_full_power(5.0)
 	hud.show_message("IMMORTAL & 2x DAMAGE! (5s)", 5.0)

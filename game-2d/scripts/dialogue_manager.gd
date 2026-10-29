@@ -21,6 +21,14 @@ func start_dialogue(lines: Array) -> void:
 	dialogue_started.emit()
 	dialogue_box.start(lines)
 
+func stop_dialogue() -> void:
+	if not is_active and (not dialogue_box or not dialogue_box.visible):
+		return
+	is_active = false
+	if is_instance_valid(dialogue_box):
+		dialogue_box.force_close()
+	dialogue_ended.emit()
+
 func _on_dialogue_completed() -> void:
 	is_active = false
 	dialogue_ended.emit()

@@ -115,6 +115,8 @@ func _on_resume_pressed() -> void:
 	resume()
 
 func _on_restart_pressed() -> void:
+	if has_node("/root/DialogueManager"):
+		DialogueManager.stop_dialogue()
 	is_paused = false
 	get_tree().paused = false
 	visible = false
@@ -145,6 +147,8 @@ func _on_confirm_no_pressed() -> void:
 	_close_confirm_dialog()
 
 func _on_confirm_yes_pressed() -> void:
+	if has_node("/root/DialogueManager"):
+		DialogueManager.stop_dialogue()
 	is_paused = false
 	get_tree().paused = false
 	visible = false

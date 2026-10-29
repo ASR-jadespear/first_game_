@@ -11,7 +11,6 @@ const TEXTURE_PLAYER2 = preload("res://assets/images/player/Player2.png")
 @onready var speaker_label: Label = %SpeakerNameLabel
 @onready var dialogue_label: RichTextLabel = %DialogueLabel
 @onready var next_button: TextureButton = %NextButton
-@onready var next_hint_label: Label = %NextHintLabel
 @onready var click_area: Control = $Root/ClickArea
 @onready var type_sound: AudioStreamPlayer = $TypeSound
 @onready var select_sound: AudioStreamPlayer = $SelectSound
@@ -192,7 +191,50 @@ func _close_dialogue() -> void:
 	dialogue_completed.emit()
 
 
+func force_close() -> void:
+	is_active = false
+	is_typing = false
+	dialogue_queue.clear()
+	current_index = 0
+	if bounce_tween and bounce_tween.is_valid():
+		bounce_tween.kill()
+	if typing_tween and typing_tween.is_valid():
+		typing_tween.kill()
+	if is_instance_valid(root_control):
+		root_control.modulate.a = 0.0
+	visible = false
+
+
+const PORTRAIT_PATHS: Array[String] = [
+	"res://assets/images/portrait/the boy/00.png",
+	"res://assets/images/portrait/the boy/01.png",
+	"res://assets/images/portrait/the boy/02.png",
+	"res://assets/images/portrait/the boy/03.png",
+	"res://assets/images/portrait/the boy/04.png",
+	"res://assets/images/portrait/the boy/05.png",
+	"res://assets/images/portrait/the boy/06.png",
+	"res://assets/images/portrait/the boy/07.png",
+	"res://assets/images/portrait/the boy/08.png",
+	"res://assets/images/portrait/the boy/09.png",
+	"res://assets/images/portrait/the boy/10.png",
+	"res://assets/images/portrait/####/00.png",
+	"res://assets/images/portrait/####/01.png",
+	"res://assets/images/portrait/####/10.png",
+	"res://assets/images/portrait/####/11.png",
+	"res://assets/images/portrait/####/20.png",
+	"res://assets/images/portrait/####/21.png",
+	"res://assets/images/portrait/####/30.png",
+	"res://assets/images/portrait/####/31.png",
+	"res://assets/images/portrait/####/40.png",
+	"res://assets/images/portrait/####/41.png",
+	"res://assets/images/portrait/final_bg.png"
+]
+
 func _preload_portraits() -> void:
+	for path in PORTRAIT_PATHS:
+		_get_cached_texture(path)
+
+	# Dynamic scan fallback in editor/development
 	var folders = ["the boy", "####"]
 	for folder in folders:
 		var dir_path = "res://assets/images/portrait/%s" % folder
@@ -201,9 +243,11 @@ func _preload_portraits() -> void:
 			dir.list_dir_begin()
 			var file_name = dir.get_next()
 			while file_name != "":
-				if not dir.current_is_dir() and file_name.ends_with(".png"):
-					var full_path = "%s/%s" % [dir_path, file_name]
-					_get_cached_texture(full_path)
+				if not dir.current_is_dir():
+					var clean_name = file_name.trim_suffix(".remap")
+					if clean_name.ends_with(".png"):
+						var full_path = "%s/%s" % [dir_path, clean_name]
+						_get_cached_texture(full_path)
 				file_name = dir.get_next()
 			dir.list_dir_end()
 
@@ -211,10 +255,15 @@ func _preload_portraits() -> void:
 func _get_cached_texture(path: String) -> Texture2D:
 	if portrait_cache.has(path):
 		return portrait_cache[path]
-	if ResourceLoader.exists(path):
-		var tex = load(path) as Texture2D
+	var tex = load(path) as Texture2D
+	if tex:
 		portrait_cache[path] = tex
 		return tex
+	if ResourceLoader.exists(path):
+		tex = ResourceLoader.load(path) as Texture2D
+		if tex:
+			portrait_cache[path] = tex
+			return tex
 	return null
 
 

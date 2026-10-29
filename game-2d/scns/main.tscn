@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://h57q41tlcau4"]
 
-[ext_resource type="PackedScene" uid="uid://b0p7or2pobmc6" path="res://scns/levels/base_level.tscn" id="1_3nmg6"]
 [ext_resource type="Script" uid="uid://cxfphn62cvkli" path="res://scripts/main.gd" id="1_q6pqo"]
 [ext_resource type="PackedScene" uid="uid://bkq4oko6utysy" path="res://scns/hud.tscn" id="3_3nmg6"]
 [ext_resource type="AudioStream" uid="uid://cssq77plloh73" path="res://assets/audio/Music.wav" id="4_q6pqo"]
@@ -12,8 +11,7 @@
 [node name="Main" type="Node2D" unique_id=1529746188]
 script = ExtResource("1_q6pqo")
 
-[node name="LevelRoot" parent="." unique_id=1950383035 instance=ExtResource("1_3nmg6")]
-position = Vector2(125, 87)
+[node name="LevelRoot" type="Node2D" parent="." unique_id=1950383035]
 
 [node name="HUD" parent="." unique_id=1656482185 instance=ExtResource("3_3nmg6")]
 

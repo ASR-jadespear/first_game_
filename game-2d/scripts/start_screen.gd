@@ -59,6 +59,8 @@ func _animate_title_pulse() -> void:
 	_title_tween.tween_property(title_label, "scale", Vector2(1.0, 1.0), 1.6).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 func open() -> void:
+	if has_node("/root/DialogueManager"):
+		DialogueManager.stop_dialogue()
 	_is_transitioning = false
 	visible = true
 	if about_dialog:
